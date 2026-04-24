@@ -1,0 +1,115 @@
+---
+title: "Plugins: Extend Beekeeper Studio's Functionality"
+description: "Install, update, and manage plugins to add new tools and capabilities to Beekeeper Studio. Available to all users, including the free Community Edition."
+---
+
+Plugins add new tools and capabilities directly to your Beekeeper Studio workflow. They appear as new tab types or sidebar panels, running in their own secure environment while having access to your database connections and query capabilities through a controlled interface.
+
+<Note>
+  Plugins are available to **all Beekeeper Studio users**, including those on the free Community Edition. Some individual plugins — such as the AI Shell — require a paid subscription.
+</Note>
+
+## Available plugins
+
+<CardGroup cols={1}>
+  <Card title="AI Shell" icon="sparkles" href="/user-guide/ai-shell">
+    **Requires paid subscription.** Ask questions about your data in plain English and get AI-powered responses. The AI Shell appears as a new tab type alongside your regular query tabs, with a built-in result viewer.
+  </Card>
+</CardGroup>
+
+## Installing plugins
+
+<Steps>
+  <Step title="Open the plugin manager">
+    Go to **Tools > Manage Plugins**.
+  </Step>
+  <Step title="Find the plugin">
+    Browse the list of available plugins.
+  </Step>
+  <Step title="Install">
+    Click **Install** next to the plugin you want.
+  </Step>
+</Steps>
+
+## Updating plugins
+
+Beekeeper Studio automatically checks for plugin updates every time you start the application and installs them in the background. To disable auto-update for a specific plugin:
+
+<Steps>
+  <Step title="Open the plugin manager">
+    Go to **Tools > Manage Plugins**.
+  </Step>
+  <Step title="Find the plugin">
+    Locate the plugin you want to manage.
+  </Step>
+  <Step title="Disable auto-update">
+    Uncheck **Auto-update** for that plugin.
+  </Step>
+</Steps>
+
+## Uninstalling plugins
+
+<Steps>
+  <Step title="Open the plugin manager">
+    Go to **Tools > Manage Plugins**.
+  </Step>
+  <Step title="Find the plugin">
+    Locate the plugin you want to remove.
+  </Step>
+  <Step title="Uninstall">
+    Click **Uninstall**.
+  </Step>
+</Steps>
+
+## Installing a specific plugin version
+
+You may need a specific plugin version if the latest release requires a newer version of Beekeeper Studio than you have installed, or if you need to roll back to an older version.
+
+<Steps>
+  <Step title="Disable auto-update">
+    Go to **Tools > Manage Plugins**, find the plugin, and uncheck **Auto-update**. This prevents Beekeeper Studio from overwriting your manually installed version.
+  </Step>
+  <Step title="Open the plugin's GitHub page">
+    In the plugin manager, click the **GitHub link** for the plugin.
+  </Step>
+  <Step title="Browse releases">
+    Go to the **Releases** page on GitHub and find the version you need.
+  </Step>
+  <Step title="Check compatibility">
+    Click the release to view its assets and find `manifest.json`. Check the `minAppVersion` field to confirm the plugin version is compatible with your installed Beekeeper Studio version. Also note the plugin `id` from the manifest.
+  </Step>
+  <Step title="Download the ZIP">
+    Download the plugin ZIP file (e.g., `bks-ai-shell-1.2.0.zip`) — not the source code archive.
+  </Step>
+  <Step title="Install manually">
+    Navigate to your plugins directory and replace the existing plugin folder:
+
+    <Tabs>
+      <Tab title="Linux">
+        ```bash
+        ~/.config/beekeeper-studio/plugins/
+        ```
+      </Tab>
+      <Tab title="macOS">
+        ```bash
+        ~/Library/Application Support/beekeeper-studio/plugins/
+        ```
+      </Tab>
+      <Tab title="Windows">
+        ```
+        %APPDATA%\beekeeper-studio\plugins\
+        ```
+      </Tab>
+      <Tab title="Portable">
+        ```bash
+        /path/to/beekeeper-studio/beekeeper-studio-data/plugins/
+        ```
+      </Tab>
+    </Tabs>
+
+    Delete the existing folder for the plugin, create a new folder with the same plugin ID, then extract the downloaded ZIP file contents into that new folder.
+  </Step>
+  <Step title="Restart Beekeeper Studio">
+    The specific plugin version is now installed and ready to use.
+  </Step>
+</Steps>

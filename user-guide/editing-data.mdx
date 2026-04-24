@@ -1,0 +1,100 @@
+---
+title: "Editing Data in the Beekeeper Table View"
+description: "Browse, filter, sort, and edit table data in Beekeeper Studio's spreadsheet-like Table View, including inline editing, row actions, and staged changes."
+---
+
+The Table View is Beekeeper Studio's spreadsheet-like interface for exploring and modifying data in any database table. Double-click a table in the left sidebar to open it, and you get a fully interactive grid where you can filter, sort, edit cells, add rows, delete rows, and export data — all without writing SQL.
+
+## Browsing and selecting data
+
+The Table View behaves like a spreadsheet. You can:
+
+- **Select a range** of cells with click and drag
+- **Multi-select** with `Ctrl+Click` (Windows/Linux) or `Cmd+Click` (macOS)
+- **Extend a selection** with `Shift+Click`
+- **Hide a column** by right-clicking its header and choosing **Hide column**
+- **Resize columns** individually or together by dragging column borders
+
+### Copying data
+
+<CardGroup cols={2}>
+  <Card title="Spreadsheet copy" icon="copy">
+    Press `Ctrl+C` / `Cmd+C` to copy selected cells in a tab-separated format that pastes neatly into Excel or Google Sheets.
+  </Card>
+  <Card title="Format copy" icon="clipboard">
+    Right-click any cell to copy the row or selection as **CSV**, **JSON**, **Markdown**, or **SQL Insert**.
+  </Card>
+</CardGroup>
+
+### Generate an IN clause
+
+Select one or more cells in a column, right-click, and choose **Create IN Statement**. Beekeeper generates a ready-to-paste `IN (...)` clause from the selected values.
+
+```sql
+-- Example output from selecting three user IDs
+WHERE user_id IN (101, 202, 303)
+```
+
+## Filtering the table
+
+The filter bar at the top of the Table View lets you narrow the rows displayed without writing a full query.
+
+### Filter GUI
+
+Use the graphical filter to check columns against common conditions:
+
+| Condition | Example |
+|---|---|
+| Equality | `status = 'active'` |
+| Greater / less than | `age > 18` |
+| LIKE | `name LIKE '%smith%'` |
+| IN | `role IN ('admin', 'editor')` |
+
+<Warning>
+  When using `LIKE`, remember to include `%` wildcards. To find titles containing "foo" write `%foo%`, not `foo`.
+</Warning>
+
+### Raw SQL filter
+
+Click the **`<>`** icon to the left of the filter bar to type a raw SQL expression. Anything valid in a `WHERE` clause works here.
+
+```sql
+created_at > '2024-01-01' AND status != 'deleted'
+```
+
+## Editing data
+
+Double-click any cell to edit it inline.
+
+<Note>
+  Beekeeper only supports inline editing for tables that have a primary key. SQLite is an exception — every SQLite row has an implicit `rowid` that Beekeeper uses to enable editing even without an explicit primary key.
+</Note>
+
+### Editing JSON and large values
+
+Editing a JSON document in a small table cell is awkward. Right-click the cell and choose **Edit in Modal** to open a pop-out editor with syntax highlighting and validation.
+
+### Staged changes
+
+Beekeeper stages all edits before writing them to the database, so you can batch multiple changes into a single transaction:
+
+| Color | Meaning |
+|---|---|
+| Green | New row to be inserted |
+| Red | Row marked for deletion |
+| Orange | Cell value to be updated |
+
+When you are ready, click **Apply** in the bottom-right corner to commit all staged changes at once. Click **Reset** to discard them. You can also click **Copy To SQL** to inspect or tweak the generated SQL before running it.
+
+<Warning>
+  Sorting or filtering the table while you have staged changes will discard those changes.
+</Warning>
+
+## Adding and deleting rows
+
+- Click the **+** button in the bottom-right corner to add a new blank row. New rows appear at the top of the UI for convenience but are inserted at the end of the table.
+- Right-click any row (or a multi-row selection) to **Delete** or **Clone** it.
+
+## Exporting table data
+
+Click the **⚙** icon in the bottom-right and select **Export** to export the entire table or the current filtered view to CSV, JSON, SQL, or other formats. See [Data Export](/user-guide/data-export) for the full list of options.

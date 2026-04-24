@@ -1,0 +1,83 @@
+---
+title: "Connect to SurrealDB in Beekeeper Studio"
+description: "Connect to SurrealDB over WebSocket or HTTP with multiple authentication methods. Browse tables, filter data, and run queries. Requires Ultimate edition."
+---
+
+Beekeeper Studio supports SurrealDB connections over WebSocket (`ws`/`wss`) and HTTP (`http`/`https`). You can browse schemafull tables, filter and edit data, and run queries against your SurrealDB instance. SurrealDB support is in active development.
+
+<Note>
+  SurrealDB requires the **Ultimate** (paid) edition of Beekeeper Studio.
+</Note>
+
+<Warning>
+  SurrealDB support is an early implementation. Core features work well, but some capabilities are still in progress. Check back frequently for updates.
+</Warning>
+
+## Connection details
+
+| Field | Default | Description |
+|---|---|---|
+| Protocol | `ws` | Communication protocol: `ws`, `wss`, `http`, or `https` |
+| Host | — | IP address or hostname of your SurrealDB instance |
+| Port | `8000` | Port SurrealDB listens on |
+| Authentication Method | — | See authentication options below |
+| Username | — | SurrealDB username |
+| Password | — | SurrealDB password |
+
+## Connect from the app
+
+<Steps>
+  <Step title="Open the connection screen">
+    Launch Beekeeper Studio and open the connection screen.
+  </Step>
+  <Step title="Select SurrealDB">
+    Choose **SurrealDB** from the connection type dropdown.
+  </Step>
+  <Step title="Choose a protocol">
+    Select your protocol from the dropdown: `ws` for unencrypted WebSocket, `wss` for encrypted WebSocket, `http`, or `https`.
+  </Step>
+  <Step title="Enter host and port">
+    Fill in the **host** and **port** fields. The default port is `8000`.
+  </Step>
+  <Step title="Select an authentication method">
+    Choose from the authentication methods provided by SurrealDB and enter your **username** and **password**.
+  </Step>
+  <Step title="Connect">
+    Click **Connect**.
+  </Step>
+</Steps>
+
+## Supported features
+
+<CardGroup cols={2}>
+  <Card title="Table data view" icon="table">
+    Browse schemafull collection data in a table layout.
+  </Card>
+  <Card title="Sort and filter" icon="filter">
+    Sort and filter table data by field values.
+  </Card>
+  <Card title="Table structure view" icon="list">
+    Inspect the structure of schemafull tables.
+  </Card>
+  <Card title="Entity sidebar" icon="sidebar">
+    Navigate databases and tables from the sidebar.
+  </Card>
+  <Card title="Edit data" icon="pen">
+    Modify records directly in the table view.
+  </Card>
+  <Card title="Run queries" icon="terminal">
+    Execute SurrealQL queries against your database.
+  </Card>
+  <Card title="Export" icon="download">
+    Export data from your SurrealDB instance.
+  </Card>
+  <Card title="SSH tunneling" icon="lock">
+    Connect through an SSH tunnel for private network deployments.
+  </Card>
+</CardGroup>
+
+## Still in progress
+
+- Import
+- Schema editing
+- Backup and restore

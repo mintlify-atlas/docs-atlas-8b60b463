@@ -1,0 +1,109 @@
+---
+title: "Connect to SQLite in Beekeeper Studio"
+description: "Open SQLite databases by double-clicking a file, from the terminal, or directly in the app. Supports runtime extensions on Windows, macOS, and Linux."
+---
+
+SQLite is a file-based database — there's no server to configure and no credentials to manage. Beekeeper Studio makes it even simpler: you can open a SQLite file by double-clicking it in your file browser, dragging it into the app, or selecting it from the connection screen.
+
+<Note>
+  SQLite is available in the free **Community** edition of Beekeeper Studio.
+</Note>
+
+## Connect from the app
+
+<Steps>
+  <Step title="Open the connection screen">
+    Launch Beekeeper Studio. The connection screen opens automatically for new installations.
+  </Step>
+  <Step title="Select SQLite as the connection type">
+    Choose **SQLite** from the connection type dropdown.
+  </Step>
+  <Step title="Choose your database file">
+    Click the file picker and navigate to your `.db`, `.sqlite`, or `.sqlite3` file.
+  </Step>
+  <Step title="Click Connect">
+    Press **Connect** to open the database.
+  </Step>
+</Steps>
+
+## Create a new SQLite database
+
+You can create a brand-new SQLite database without leaving Beekeeper Studio.
+
+<Steps>
+  <Step title="Select SQLite as the connection type">
+    Choose **SQLite** from the connection type dropdown.
+  </Step>
+  <Step title="Click Create">
+    Click the **Create** button next to the file picker.
+  </Step>
+  <Step title="Choose a location and filename">
+    Select where you want to save the new database file and give it a name.
+  </Step>
+  <Step title="Click Connect">
+    Press **Connect** to open the newly created database.
+  </Step>
+</Steps>
+
+## Open by double-clicking a file
+
+When you install Beekeeper Studio, it registers itself as the default application for these file extensions:
+
+- `.db`
+- `.sqlite`
+- `.sqlite3`
+
+As long as Beekeeper Studio remains the default app for these types, double-clicking any SQLite file in your file browser will open it directly in Beekeeper Studio.
+
+## Open from the terminal
+
+You can also open a SQLite file from the command line, as long as file associations are set up.
+
+<Tabs>
+  <Tab title="macOS">
+    ```bash
+    open ./path/to/example.db
+    ```
+  </Tab>
+  <Tab title="Linux">
+    ```bash
+    xdg-open ./path/to/example.db
+    ```
+  </Tab>
+</Tabs>
+
+## SQLite runtime extensions
+
+SQLite supports [loadable runtime extensions](https://www.sqlite.org/loadext.html) that add new functions and capabilities. For example, [sqlean](https://github.com/nalgeon/sqlean) adds crypto functions, array handling, and more.
+
+Beekeeper Studio can load a runtime extension every time it opens a SQLite connection.
+
+<Warning>
+  Runtime extension loading is a **global** setting — it applies to every SQLite connection on your machine, not just one specific file.
+</Warning>
+
+<Steps>
+  <Step title="Expand Runtime Extensions">
+    On the SQLite connection form, expand the **Runtime Extension** settings block.
+  </Step>
+  <Step title="Select the extension file">
+    Click the file picker and choose your compiled extension file.
+  </Step>
+  <Step title="Connect">
+    Click **Connect**. Beekeeper Studio loads the extension before executing any queries.
+  </Step>
+</Steps>
+
+### Extension requirements
+
+The extension must be compiled for your current operating system and use the correct file extension:
+
+| Operating system | Required file extension |
+|---|---|
+| Windows | `.dll` |
+| macOS | `.dylib` |
+| Linux | `.so` |
+
+<Note>
+  If you switch operating systems, you'll need a recompiled version of the extension for the new platform.
+</Note>

@@ -1,0 +1,251 @@
+---
+title: "Plugin Views in Beekeeper Studio"
+description: "Understand tab views, sidebar views, view state persistence, and view context params including cell, column, row, and corner menu parameters."
+---
+
+Views are the building blocks of a Beekeeper Studio plugin's user interface. Each view maps to an HTML file that is rendered inside an `<iframe>` within the application. You declare your views in `manifest.json`, and Beekeeper Studio renders them in the correct location — as a workspace tab, a sidebar panel, or in response to a context menu action.
+
+<Warning>
+  The plugin system is in beta and available in Beekeeper Studio 5.3+. We'd love your feedback!
+</Warning>
+
+## Tab views
+
+Tab views appear in the main workspace area alongside query tabs, table tabs, and other content.
+
+### Shell tab
+
+The `shell-tab` type renders your plugin's iframe at the top of the tab and includes a collapsible result table at the bottom. This layout suits plugins that execute queries and want to display results in a familiar tabular format without building a custom table component.
+
+```json manifest.json
+{
+  "capabilities": {
+    "views": [
+      {
+        "id": "data-analyzer",
+        "name": "Data Analyzer",
+        "type": "shell-tab",
+        "entry": "index.html"
+      }
+    ]
+  }
+}
+```
+
+Use `expandTableResult()` from the plugin API to push query results into the bottom table panel.
+
+### Plain tab
+
+The `plain-tab` type gives your plugin the full tab area. There is no built-in result table — your plugin controls the entire layout.
+
+```json manifest.json
+{
+  "capabilities": {
+    "views": [
+      {
+        "id": "dashboard",
+        "name": "Dashboard",
+        "type": "plain-tab",
+        "entry": "dashboard.html"
+      }
+    ]
+  }
+}
+```
+
+## Sidebar views (planned)
+
+<Info>
+  Sidebar views are planned for future releases. The view types below are not yet available.
+</Info>
+
+Sidebar views appear as persistent panels alongside the main workspace, remaining visible while users work in other tabs.
+
+```json manifest.json
+{
+  "capabilities": {
+    "views": [
+      {
+        "id": "quick-reference",
+        "name": "SQL Reference",
+        "type": "secondary-sidebar",
+        "entry": "sidebar.html"
+      }
+    ]
+  }
+}
+```
+
+## Multiple views per plugin
+
+A single plugin can declare multiple views. Each view is independent and can have its own entry file, type, and menu placements.
+
+```json manifest.json
+{
+  "capabilities": {
+    "views": [
+      {
+        "id": "main-interface",
+        "name": "Data Processor",
+        "type": "shell-tab",
+        "entry": "main.html"
+      },
+      {
+        "id": "quick-tools",
+        "name": "Quick Tools",
+        "type": "secondary-sidebar",
+        "entry": "tools.html"
+      }
+    ]
+  }
+}
+```
+
+## View state
+
+Each plugin view can store and retrieve its own state using `getViewState` and `setViewState`. State is persisted across application restarts.
+
+### State isolation
+
+View state is isolated per view instance:
+
+- Each view tab maintains its own independent state.
+- Views cannot access each other's state.
+- If a user opens two tabs from the same plugin, each tab has a completely separate state object.
+
+### Saving and restoring state
+
+```javascript
+import { getViewState, setViewState } from "@beekeeperstudio/plugin";
+
+// Save state when the user interacts with your plugin
+await setViewState({
+  conversations: [
+    "AI: Hello, how can I help you today?",
+    "Human: Make a plain sandwich recipe using SQL.",
+  ]
+});
+
+// Restore state when the view loads
+const state = await getViewState();
+if (state) {
+  setConversations(state.conversations);
+}
+```
+
+<Tip>
+  Call `getViewState()` early in your plugin's initialization sequence, before rendering the UI, to restore any previously saved state without a visible flash of default content.
+</Tip>
+
+## View context
+
+Every plugin view has a context that describes how it was opened. You retrieve it using `getViewContext()`. The context always includes the `command` field from your `manifest.json`, and may include `params` depending on where the menu item was invoked.
+
+```typescript
+import { getViewContext } from "@beekeeperstudio/plugin";
+
+const context = await getViewContext();
+console.log(context.command); // e.g. "analyze-data"
+console.log(context.params);  // depends on menu placement
+```
+
+### Context menu params
+
+When your plugin is opened from a context menu placement, the `params` object carries information about what was right-clicked. The shape of `params` depends on the placement.
+
+<AccordionGroup>
+
+<Accordion title="Cell context menu (results.cell.context / tableTable.cell.context)">
+
+The `params` object conforms to `CellMenuParams`:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `target.type` | `"cell"` | Fixed value identifying this as a cell target |
+| `target.row` | `number` | Row index of the clicked cell |
+| `target.column` | `string` | Column name of the clicked cell |
+| `target.value` | `JsonValue` | Value of the clicked cell |
+| `activeRange.rows` | `number[]` | Selected row indices |
+| `activeRange.columns` | `string[]` | Selected column names |
+| `activeRange.value` | `JsonValue[][]` | 2D array of selected values |
+
+```typescript
+const context = await getViewContext();
+// context.params.target.value — the cell value that was right-clicked
+// context.params.activeRange  — the full selection
+```
+
+</Accordion>
+
+<Accordion title="Column header context menu (results.columnHeader.context / tableTable.columnHeader.context)">
+
+The `params` object conforms to `ColumnMenuParams`:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `target.type` | `"column"` | Fixed value identifying this as a column target |
+| `target.column` | `string` | Column name that was right-clicked |
+| `activeRange.rows` | `number[]` | Selected row indices |
+| `activeRange.columns` | `string[]` | Selected column names |
+| `activeRange.value` | `JsonValue[][]` | 2D array of selected values |
+
+</Accordion>
+
+<Accordion title="Row header context menu (results.rowHeader.context / tableTable.rowHeader.context)">
+
+The `params` object conforms to `RowMenuParams`:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `target.type` | `"row"` | Fixed value identifying this as a row target |
+| `target.row` | `number` | Row index that was right-clicked |
+| `activeRange.rows` | `number[]` | Selected row indices |
+| `activeRange.columns` | `string[]` | Selected column names |
+| `activeRange.value` | `JsonValue[][]` | 2D array of selected values |
+
+</Accordion>
+
+<Accordion title="Corner context menu (results.corner.context / tableTable.corner.context)">
+
+The `params` object conforms to `CornerMenuParams`:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `target.type` | `"corner"` | Fixed value identifying this as a corner target |
+| `activeRange.rows` | `number[]` | Selected row indices |
+| `activeRange.columns` | `string[]` | Selected column names |
+| `activeRange.value` | `JsonValue[][]` | 2D array of selected values |
+
+</Accordion>
+
+</AccordionGroup>
+
+### Full context example
+
+```typescript
+import { getViewContext } from "@beekeeperstudio/plugin";
+
+const context = await getViewContext();
+
+// Always available
+console.log(context.command); // "analyze-data"
+
+// Available when opened from a cell context menu
+if (context.params?.target?.type === "cell") {
+  const { row, column, value } = context.params.target;
+  const { rows, columns, value: selectedValues } = context.params.activeRange;
+  console.log(`Clicked cell: column=${column}, row=${row}, value=${value}`);
+  console.log(`Selected ${rows.length} rows across ${columns.length} columns`);
+}
+```
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Manifest reference" icon="file-json" href="/plugin-dev/manifest">
+    See all view type and menu placement options available in manifest.json.
+  </Card>
+  <Card title="API reference" icon="code" href="/plugin-dev/api-reference">
+    Full reference for getViewContext, getViewState, setViewState, expandTableResult, and all other API methods.
+  </Card>
+</CardGroup>

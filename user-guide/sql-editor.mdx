@@ -1,0 +1,126 @@
+---
+title: "SQL Editor: Write and Run Queries in Beekeeper"
+description: "Learn how to write, run, and manage SQL queries in Beekeeper Studio, including autocomplete, run contexts, query history, and Vim mode."
+---
+
+The SQL Editor is the heart of Beekeeper Studio, giving you a full-featured environment for writing and executing SQL against any connected database. This page covers everything from basic query execution to advanced features like parameterized queries, Vim mode, and per-connection query history.
+
+## Running queries
+
+Open a SQL editor tab from the main interface and type your query. To execute it, press `Ctrl+Enter` (Windows/Linux) or `Cmd+Enter` (macOS), or click the **Run** button in the toolbar.
+
+### Run contexts
+
+When your editor contains multiple statements, you can control exactly what gets executed:
+
+<CardGroup cols={3}>
+  <Card title="Run everything" icon="play">
+    The default behavior — runs all statements in the editor pane.
+  </Card>
+  <Card title="Run current query" icon="arrow-right">
+    Beekeeper highlights the "current" query under your cursor and runs only that statement.
+  </Card>
+  <Card title="Run selection" icon="text-cursor">
+    Select any portion of your SQL and only that selection will execute.
+  </Card>
+</CardGroup>
+
+### Large result sets
+
+By default Beekeeper truncates results at 50,000 records to conserve memory. In the commercial edition you can choose **Run To File**, which streams the full result set directly to a CSV without loading it all into memory.
+
+When you run multiple queries, use the dropdown on the status bar to switch between result sets.
+
+## Code completion
+
+Beekeeper's autocomplete is designed to be helpful without being intrusive. Suggestions appear automatically in two situations:
+
+- **Tables** — suggested after you type `FROM` or `JOIN`
+- **Columns** — suggested after you type a table name or alias followed by a period, e.g. `film.`
+
+To trigger autocomplete manually at any point, press `Ctrl+Space`.
+
+```sql
+-- Beekeeper suggests table names after FROM
+SELECT * FROM <autocomplete triggers here>
+
+-- Beekeeper suggests column names after the dot
+SELECT film.title, film.rental_rate FROM film
+```
+
+## Query parameters
+
+You can parameterize queries and Beekeeper will prompt you for values at run time. Three syntax styles are supported depending on your database:
+
+```sql
+-- Named parameters (colon-prefix style)
+SELECT * FROM orders WHERE status = :status AND region = :region
+
+-- Positional parameters (dollar-sign style, common in PostgreSQL)
+SELECT * FROM orders WHERE status = $1 AND region = $2
+
+-- Anonymous placeholder style
+SELECT * FROM orders WHERE status = ? AND region = ?
+```
+
+You can configure which parameter styles are active for each database engine in the [config file](/user-guide/configuration).
+
+## Query history
+
+Beekeeper automatically records every query you run. Access your history by clicking the **history icon** in the query editor toolbar.
+
+<Note>
+  Query history is scoped per connection. You only see queries run against the currently active database, making it easy to find previous work without noise from other connections.
+</Note>
+
+## Editor font size
+
+Adjust the editor font size from the **View** menu:
+
+| Action | Shortcut |
+|---|---|
+| Increase font size | `Ctrl+Shift+.` |
+| Decrease font size | `Ctrl+Shift+,` |
+| Reset font size | Available in View menu |
+
+## Keyboard shortcuts
+
+Beekeeper Studio includes a built-in keyboard shortcuts reference. Open it from the **Help** menu to see all available shortcuts organized by category.
+
+## Vim mode
+
+If you prefer Vim keybindings, enable Vim mode by clicking the **cog icon** in the bottom-right corner of the query editor and selecting Vim. Your editor preference is saved across connections and restarts.
+
+### Custom Vim keybindings
+
+Add a `.beekeeper.vimrc` file to your Beekeeper user directory to define custom mappings:
+
+<Tabs>
+  <Tab title="Windows">
+    `%APPDATA%\beekeeper-studio\.beekeeper.vimrc`
+  </Tab>
+  <Tab title="Linux">
+    `~/.config/beekeeper-studio/.beekeeper.vimrc`
+  </Tab>
+  <Tab title="macOS">
+    `~/Library/Application Support/beekeeper-studio/.beekeeper.vimrc`
+  </Tab>
+</Tabs>
+
+```text
+" Example: Helix-style line navigation
+nmap gl $
+nmap gh ^
+```
+
+Supported commands: `nmap`, `imap`, and `vmap`.
+
+## Transaction management
+
+Transactions in the SQL editor are automatically detected. Beekeeper reserves a dedicated connection for your tab until the transaction is committed or rolled back.
+
+For full manual control, see [Manual Transaction Management](/user-guide/transactions).
+
+<Info>
+  Transaction management is supported for PostgreSQL, CockroachDB, Redshift, MySQL, MariaDB, SQL Server, Firebird, and Oracle.
+</Info>

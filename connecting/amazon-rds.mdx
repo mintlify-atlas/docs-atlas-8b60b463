@@ -1,0 +1,92 @@
+---
+title: "Connect to Amazon RDS in Beekeeper Studio"
+description: "Use AWS IAM authentication to connect to Amazon RDS PostgreSQL or MySQL without a static password. Requires IAM DB authentication enabled on the RDS instance."
+---
+
+Beekeeper Studio supports AWS IAM database authentication for Amazon RDS, letting you connect to PostgreSQL and MySQL instances using your AWS CLI session instead of a static password. You'll need IAM DB authentication enabled on the RDS instance and an IAM user or role with the appropriate policy.
+
+## Prerequisites
+
+Before you connect, make sure the following are in place:
+
+- IAM DB authentication is enabled on your RDS instance (modify the instance in the AWS Console to enable it).
+- Your IAM user has a policy that allows `rds-db:connect` on the target database.
+- Your local [AWS CLI is configured](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) with valid credentials.
+- SSL is enabled — most RDS instances require it.
+
+## IAM policy example
+
+Attach a policy similar to the following to your IAM user:
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "rds-db:connect"
+            ],
+            "Resource": [
+                "arn:aws:rds:eu-north-1:USERID:db:DB_NAME/USERNAME"
+            ]
+        }
+    ]
+}
+```
+
+You can also use the managed `AmazonRDSFullAccess` policy, though a least-privilege policy is recommended.
+
+## Connect using AWS CLI authentication
+
+<Steps>
+  <Step title="Configure your AWS credentials">
+    Make sure your AWS CLI credentials are set up. Run `aws sts get-caller-identity` to verify your session is active.
+
+    See the [AWS CLI Configuration guide](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) if you haven't set this up yet.
+  </Step>
+  <Step title="Open the connection screen">
+    Launch Beekeeper Studio and open the connection screen.
+  </Step>
+  <Step title="Select your database type">
+    Choose **PostgreSQL** or **MySQL** depending on your RDS engine.
+  </Step>
+  <Step title="Select AWS CLI Authentication">
+    In the **Authentication Method** dropdown, select **AWS CLI Authentication**.
+  </Step>
+  <Step title="Enter your connection details">
+    Provide:
+    - **Host** — your RDS endpoint
+    - **Database** — the name of your database
+    - **Username** — the database user configured for IAM auth
+    - **AWS Region** — the region where your RDS instance is running (e.g., `us-east-1`)
+    - **AWS Profile** — if you have multiple profiles, specify which one to use
+
+    <Note>
+      For PostgreSQL, a database name is required. If omitted, it defaults to the username.
+    </Note>
+  </Step>
+  <Step title="Enable SSL">
+    Check the **SSL** option. Most RDS instances require SSL.
+  </Step>
+  <Step title="Connect">
+    Click **Connect**. Beekeeper Studio uses your active CLI session to retrieve a temporary access token and authenticate securely.
+  </Step>
+</Steps>
+
+## Important notes
+
+<Warning>
+  If you use security groups with time-limited IP allowlisting, idle connections may be dropped and fail to reconnect after the allowlist expires. Adjust your connection's idle timeout settings if you experience this.
+</Warning>
+
+- SSL is required on most RDS instances — make sure the **SSL** checkbox is enabled.
+- Beekeeper Studio uses the credentials file configured by the AWS CLI. Follow the [AWS CLI Configuration guide](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) to set this up.
+- If you have multiple AWS profiles, use the **AWS Profile** field to select the correct one.
+
+## Useful links
+
+- [AWS CLI Configuration](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html)
+- [IAM DB Authentication for RDS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.html)
+- [IAM Policies](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies.html)
+- [Install the AWS CLI](https://aws.amazon.com/cli/)

@@ -1,0 +1,85 @@
+---
+title: "Connect to MySQL in Beekeeper Studio"
+description: "Connect to MySQL or MariaDB using host/port or a Unix socket. Supports SSL, SSH tunneling, and connection URL import. Free Community edition."
+---
+
+MySQL is a popular open-source relational database, and Beekeeper Studio supports it fully alongside MariaDB, which uses the same wire protocol. You can connect to MySQL via TCP (host and port) or via a Unix socket for local installations.
+
+<Note>
+  MySQL and MariaDB are available in the free **Community** edition of Beekeeper Studio.
+</Note>
+
+## Connection details
+
+| Field | Default | Description |
+|---|---|---|
+| Host | `localhost` | Hostname or IP address of the MySQL server |
+| Port | `3306` | Port the server listens on |
+| Database | — | Name of the database to connect to (optional at connect time) |
+| Username | `root` | MySQL username |
+| Password | — | MySQL password (leave blank if none) |
+| SSL | Off | Enable for encrypted connections |
+
+## Connect from the app
+
+<Steps>
+  <Step title="Open the connection screen">
+    Launch Beekeeper Studio. The connection screen appears on startup.
+  </Step>
+  <Step title="Select MySQL">
+    Choose **MySQL** from the connection type dropdown.
+  </Step>
+  <Step title="Choose a connection mode">
+    Select **TCP** for a network connection (host + port), or **Socket** to use a Unix domain socket for local connections. Socket is the default for most MySQL installations on Linux and macOS.
+
+    <Note>
+      SSL and SSH tunneling are only available in TCP mode.
+    </Note>
+  </Step>
+  <Step title="Enter your credentials">
+    Fill in the **host**, **port**, **database**, **username**, and **password** fields.
+  </Step>
+  <Step title="Test and connect">
+    Click **Test Connection** to verify your settings, then click **Connect**.
+  </Step>
+</Steps>
+
+## Import a connection URL
+
+Paste a MySQL connection URL into the URL import box at the top of the connection form to populate all fields automatically:
+
+```text
+mysql://username:password@host:3306/database
+```
+
+## SSL configuration
+
+Enable SSL to encrypt traffic between Beekeeper Studio and your MySQL server. Three modes are available:
+
+<AccordionGroup>
+  <Accordion title="Trust the server (default)">
+    Connect with SSL without providing certificate files. Beekeeper Studio does not verify the server's certificate. Suitable for most hosted MySQL services.
+  </Accordion>
+  <Accordion title="Required cert (rejectUnauthorized = false)">
+    Provide a CA certificate (and optionally client certificate and key). The connection is encrypted but the server's certificate is not verified.
+  </Accordion>
+  <Accordion title="Verified cert (rejectUnauthorized = true)">
+    Provide certificate files and enable full certificate verification. The server's hostname must match the certificate.
+  </Accordion>
+</AccordionGroup>
+
+<Tip>
+  Amazon RDS for MySQL and Azure Database for MySQL both require SSL. "Trust the server" mode works without downloading certificates.
+</Tip>
+
+## SSH tunneling
+
+To connect to a MySQL server on a private network, use an SSH tunnel. See the [SSH tunneling section in the connection overview](/connecting/overview#ssh-tunneling) for setup instructions.
+
+## MariaDB
+
+MariaDB is wire-protocol compatible with MySQL. Select **MySQL** as the connection type and enter your MariaDB server's host, port, and credentials — no additional configuration is needed.
+
+## Saving a connection
+
+Enter a name in the **Connection Name** field after verifying your settings. Check **Save Passwords** to persist your password securely, then click **Save**.

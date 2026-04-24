@@ -1,0 +1,102 @@
+---
+title: "Security, PIN Lock, and Enterprise Configuration"
+description: "Beekeeper Studio keeps credentials local and never sends query data to servers. Learn about PIN lock, auto-disconnect, and enterprise security options."
+---
+
+Beekeeper Studio is a desktop application built with security as a default, not an afterthought. Your database credentials, SQL queries, and query results never leave your machine unless you explicitly choose to use cloud features — and even then, sensitive fields are encrypted before storage.
+
+## Security approach
+
+<CardGroup cols={2}>
+  <Card title="Credentials stay local" icon="lock">
+    Database credentials are stored on your device only and are never sent to Beekeeper Studio servers.
+  </Card>
+  <Card title="Queries run directly" icon="bolt">
+    SQL queries run from your machine directly to your database. Beekeeper Studio never sees or processes them.
+  </Card>
+  <Card title="Results fetch locally" icon="database">
+    Query results are fetched directly to your device. No results are processed or stored on Beekeeper Studio infrastructure.
+  </Card>
+  <Card title="Opt-in telemetry only" icon="chart-bar">
+    Telemetry is opt-in. No query content, database data, or connection details are ever collected.
+  </Card>
+</CardGroup>
+
+### Cloud services are optional
+
+Beekeeper Studio's cloud services — account management, billing, and workspace sync — are entirely optional. If you don't use cloud workspaces, no query or connection data ever reaches Beekeeper Studio infrastructure.
+
+When you do use cloud workspaces, sensitive fields like saved passwords are application-encrypted before being stored. All cloud features can also be disabled for environments with strict security postures. Beekeeper Studio works fully offline, including offline license validation.
+
+For details on disabling cloud features via administrator configuration, see the [Configuration docs](/user-guide/configuration).
+
+For a full overview of security practices, policies, and compliance posture, visit the [Trust & Security Center](https://www.beekeeperstudio.io/trust/).
+
+---
+
+## Security features
+
+### PIN lock mode
+
+PIN lock mode requires every user to enter a PIN before connecting to any database. This adds a layer of protection if you step away from your machine.
+
+To enable PIN lock mode, go to **Settings > Security** and set **Lock Mode** to **PIN**. You'll be prompted to set a PIN on next launch.
+
+<Warning>
+  Don't forget your PIN. If you lose it, the only recovery path is deleting your local application data directory (see reset steps below), which removes all local settings.
+</Warning>
+
+#### Resetting a forgotten PIN
+
+<Steps>
+  <Step title="Close Beekeeper Studio completely">
+    Make sure the application is fully quit, not just minimized.
+  </Step>
+  <Step title="Delete the application data directory">
+    Locate and delete the Beekeeper Studio data folder for your operating system:
+
+    - **Windows**: `%APPDATA%\beekeeper-studio\`
+    - **macOS**: `~/Library/Application Support/beekeeper-studio/`
+    - **Linux**: `~/.config/beekeeper-studio/`
+  </Step>
+  <Step title="Restart Beekeeper Studio">
+    The app starts fresh with default settings. You can set a new PIN from **Settings > Security**.
+  </Step>
+</Steps>
+
+### Auto-disconnect options
+
+Beekeeper Studio can automatically disconnect your database sessions when certain conditions are met. These settings are available in the `[security]` section of your configuration file:
+
+| Setting | Default | Description |
+|---|---|---|
+| `disconnectOnSuspend` | `false` | Disconnect when the system suspends or sleeps |
+| `disconnectOnLock` | `false` | Disconnect when the screen is locked |
+| `disconnectOnIdle` | `false` | Disconnect after a period of inactivity |
+| `idleThresholdSeconds` | `300` | Seconds before a user is considered idle |
+| `idleCheckIntervalSeconds` | `30` | How often to check for idle state |
+
+Combine auto-disconnect with PIN lock for a more secure session.
+
+---
+
+## Enterprise security recommendations
+
+To enforce security settings for all users on managed machines, deploy an administrator configuration file (`system.config.ini`) to the correct OS-level path. See [Configuration](/user-guide/configuration) for file locations.
+
+A recommended enterprise security configuration:
+
+```ini
+[security]
+lockMode = pin
+disconnectOnSuspend = true
+disconnectOnLock = true
+disconnectOnIdle = true
+idleThresholdSeconds = 300
+```
+
+This enforces PIN entry on first launch, requires PIN whenever connecting to a database, and disconnects users when their system is locked, suspended, or idle.
+
+<Note>
+  Users subject to an administrator configuration cannot override settings defined in `system.config.ini`. The administrator config always takes precedence over user settings.
+</Note>

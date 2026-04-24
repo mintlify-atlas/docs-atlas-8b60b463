@@ -1,0 +1,80 @@
+---
+title: "Connect to Redis in Beekeeper Studio"
+description: "Connect to Redis with optional username/password auth, TLS/SSL encryption, and ReJSON module support for viewing JSON documents stored in Redis."
+---
+
+Beekeeper Studio supports Redis as a first-class connection type, letting you browse keys, edit values, run commands through the AI shell, and view JSON documents when the ReJSON module is installed.
+
+<Note>
+  Redis is available in both the free **Community** edition and paid **Ultimate** editions of Beekeeper Studio.
+</Note>
+
+## Connection details
+
+| Field | Default | Description |
+|---|---|---|
+| Host | `127.0.0.1` | IP address or hostname of your Redis server |
+| Port | `6379` | Port your Redis server listens on |
+| Username | — | Redis username (optional; Redis 6+ with ACLs) |
+| Password | — | Redis password (optional) |
+
+## Connect from the app
+
+<Steps>
+  <Step title="Open the connection screen">
+    Launch Beekeeper Studio and open the connection screen.
+  </Step>
+  <Step title="Select Redis">
+    Choose **Redis** from the connection type dropdown.
+  </Step>
+  <Step title="Enter connection details">
+    Fill in the **host** and **port** fields. If your Redis server requires authentication, enter your **username** and/or **password**.
+  </Step>
+  <Step title="Configure SSL (optional)">
+    If your server uses TLS, expand the **TLS/SSL** settings and configure as needed.
+  </Step>
+  <Step title="Connect">
+    Click **Connect**.
+  </Step>
+</Steps>
+
+## Username authentication (ACLs)
+
+Redis 6 introduced [Access Control Lists (ACLs)](https://redis.io/docs/management/security/acl/), which let you create multiple users with individual permissions. If your server uses ACLs, enter your **username** along with your **password**.
+
+For Redis servers older than version 6 that use only `requirepass` authentication, leave the username field blank and enter just your password.
+
+## Supported features
+
+<CardGroup cols={2}>
+  <Card title="Key browsing" icon="list">
+    Browse all keys in your Redis instance and view their values.
+  </Card>
+  <Card title="Key editing" icon="pen">
+    Edit key values directly from the key viewer.
+  </Card>
+  <Card title="AI shell" icon="terminal">
+    Use the AI-powered shell to run Redis commands with natural language assistance.
+  </Card>
+  <Card title="ReJSON support" icon="brackets-curly">
+    View and edit JSON documents stored with `JSON.SET` when the ReJSON module is installed.
+  </Card>
+  <Card title="SSH tunneling" icon="lock">
+    Connect to Redis instances on private networks through an SSH tunnel.
+  </Card>
+  <Card title="TLS / SSL" icon="shield">
+    Encrypt connections with TLS for secure communication.
+  </Card>
+</CardGroup>
+
+## ReJSON support
+
+If your Redis server has the [ReJSON module](https://redis.io/docs/stack/json/) installed, Beekeeper Studio renders JSON values stored with `JSON.SET` with syntax highlighting in the value viewer. You can edit JSON documents in place without writing raw Redis commands.
+
+<Tip>
+  Redis Stack bundles ReJSON (and other modules) by default, so ReJSON support is available automatically if you're running Redis Stack.
+</Tip>
+
+## SSH tunneling
+
+To connect to a Redis server on a private network, use Beekeeper Studio's SSH tunnel feature. See the [SSH tunneling section in the connection overview](/connecting/overview#ssh-tunneling) for full setup instructions.

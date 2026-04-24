@@ -1,0 +1,100 @@
+---
+title: "Beekeeper Studio License Types and Offline Activation"
+description: "Understand the difference between online and offline Beekeeper Studio licenses, when to use each, and how to download and install an offline license key."
+---
+
+When you purchase a Beekeeper Studio subscription, you receive a license name and license key that you enter into the app. By default, this key is validated online against Beekeeper Studio's servers — which works perfectly for the vast majority of users. For teams operating in air-gapped or firewalled environments, Business and Team plan subscribers can also download an offline license key for fully local validation. See [beekeeperstudio.io/pricing](https://beekeeperstudio.io/pricing) for a full breakdown of what each plan includes.
+
+## Online licenses (default)
+
+When you activate a license in Beekeeper Studio using **Help → Manage License Keys**, the app validates your key against Beekeeper Studio's servers on a periodic basis. This is the simplest activation method and works for most users.
+
+If the app incorrectly reports that your trial has ended or that you don't have a valid license, this is typically caused by a temporary network issue or firewall blocking the validation request. In this case, an offline license solves the problem.
+
+## Offline licenses
+
+An offline license is a digitally signed file (`license.json`) that Beekeeper Studio verifies locally without contacting any servers. When present, the offline license takes priority over any online license check.
+
+<Note>
+  Offline licenses are available on **Business and Team plans** (annual subscriptions). If you need offline activation, make sure you're on an eligible plan at [beekeeperstudio.io/pricing](https://beekeeperstudio.io/pricing).
+</Note>
+
+### When to use an offline license
+
+- Your machine is behind a strict firewall that blocks outbound license validation requests.
+- You manage a fleet of machines and need consistent, network-independent activation.
+- The app incorrectly shows "trial ended" despite having a valid subscription.
+
+### How to install an offline license
+
+<Steps>
+  <Step title="Go to the license management dashboard">
+    Sign in at [app.beekeeperstudio.io/purchases](https://app.beekeeperstudio.io/purchases).
+  </Step>
+  <Step title="Open your license">
+    Click on the license you want to activate offline.
+  </Step>
+  <Step title="Download the offline key">
+    Click **Download offline key**. This gives you your signed `license.json` file.
+  </Step>
+  <Step title="Place the file in the correct directory">
+    Save the file as exactly `license.json` in the Beekeeper Studio configuration directory for your operating system:
+
+    <Tabs>
+      <Tab title="Linux">
+        ```
+        ~/.config/beekeeper-studio/license.json
+        ```
+        **Snap install:**
+        ```
+        ~/snap/beekeeper-studio/current/.config/beekeeper-studio/license.json
+        ```
+      </Tab>
+      <Tab title="Windows">
+        ```
+        ~\AppData\Roaming\beekeeper-studio\license.json
+        ```
+      </Tab>
+      <Tab title="macOS">
+        ```
+        ~/Library/Application Support/beekeeper-studio/license.json
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+  <Step title="Restart Beekeeper Studio">
+    Quit and reopen the application.
+  </Step>
+  <Step title="Verify activation">
+    Click **Help → Manage License Keys**. You should see your license listed as registered.
+  </Step>
+</Steps>
+
+## How offline license verification works
+
+The `license.json` file contains a digitally signed license key. Beekeeper Studio verifies the signature using a public key bundled with the application — no network connection is needed. The app reads this file at startup and, if it's valid, grants full access.
+
+## Subscription renewals and offline licenses
+
+The offline license file is only valid for your current paid subscription period. Each time your subscription renews, you need to download a new `license.json` from the dashboard and replace the old file.
+
+<Tip>
+  If you rely on offline licenses, an **annual subscription** is recommended so you only need to update the license file once per year rather than monthly.
+</Tip>
+
+## Troubleshooting offline licenses
+
+<AccordionGroup>
+  <Accordion title="The license isn't being recognized after restart">
+    - Confirm the file is named exactly `license.json` — no extra extensions or characters.
+    - Verify the file is in the correct directory for your operating system (see the table above).
+    - Check that the file wasn't corrupted during download by re-downloading from the dashboard.
+    - Try downloading the license file again from [app.beekeeperstudio.io/purchases](https://app.beekeeperstudio.io/purchases).
+  </Accordion>
+  <Accordion title="The dashboard shows 'Download offline key' is unavailable">
+    Offline key downloads are only available on Business and Team annual plans. If you're on a personal or monthly plan, the button will not appear. [Upgrade your plan](https://beekeeperstudio.io/pricing) to access this feature.
+  </Accordion>
+  <Accordion title="The app still shows 'trial ended' after installing the offline license">
+    Make sure you quit Beekeeper Studio completely before installing the file — don't just close the window. On Windows, check the system tray to confirm the process has exited. Then restart the app and check **Help → Manage License Keys**.
+  </Accordion>
+</AccordionGroup>

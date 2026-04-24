@@ -1,0 +1,99 @@
+---
+title: "Get started with Beekeeper Studio in minutes"
+description: "Install Beekeeper Studio, connect to your first database, and write your first SQL query using the Sakila demo database walkthrough."
+---
+
+This guide walks you through using Beekeeper Studio for the first time — from installation to writing a real SQL query. If you're new to database management tools, the Sakila demo database walkthrough below gives you a safe sandbox to explore all the major features without risking any real data.
+
+<Tip>
+If you already have a database you want to connect to, feel free to skip the Sakila walkthrough and jump straight to [connecting to a database](/connecting/overview).
+</Tip>
+
+## Step-by-step guide
+
+<Steps>
+  <Step title="Install Beekeeper Studio">
+    Download and install Beekeeper Studio for your operating system from the [download page](https://beekeeperstudio.io/get-community).
+
+    - **macOS**: Download the `.dmg` file, open it, and drag Beekeeper Studio to your Applications folder. See the [macOS installation guide](/installation/macos) for details on Intel vs. Apple Silicon.
+    - **Windows**: Run the `.exe` installer. A portable version that requires no installation is also available. See the [Windows installation guide](/installation/windows).
+    - **Linux**: AppImage, DEB, RPM, Snap, Flatpak, and Arch packages are all available. See the [Linux installation guide](/installation/linux).
+  </Step>
+
+  <Step title="Download the Sakila demo database">
+    Sakila is a sample SQLite database that models an old-school DVD rental store. It's a great way to explore Beekeeper Studio without needing a running database server.
+
+    [Download sakila.db](https://github.com/ivanceras/sakila/raw/master/sqlite-sakila-db/sakila.db)
+
+    Save the file somewhere you'll remember, like your Desktop or Downloads folder.
+  </Step>
+
+  <Step title="Open the database in Beekeeper Studio">
+    Double-click the `sakila.db` file you just downloaded. Beekeeper Studio will open and automatically connect to the SQLite database, showing you its tables in the left sidebar.
+
+    Alternatively, launch Beekeeper Studio first and use **File → Open** to browse to the `.db` file.
+  </Step>
+
+  <Step title="Browse a table">
+    In the left sidebar, double-click the `film` table. Beekeeper Studio opens a data view showing all the rows in that table. You can:
+
+    - Scroll through rows and columns
+    - Click a column header to sort
+    - Use the filter bar to search for specific values
+  </Step>
+
+  <Step title="Edit a row">
+    Click any cell in the `title` column and change a movie name. When you're ready to save, click the **Apply** button in the footer bar. Because this is just the demo database, you can make any change you like without risk.
+  </Step>
+
+  <Step title="Write your first SQL query">
+    Click the **+** button in the tab bar to open a new SQL editor tab. Paste the query below and press **Run** (or `Ctrl+Enter` / `Cmd+Enter`):
+
+    ```sql
+    SELECT
+        film.rating,
+        COUNT(DISTINCT inventory.film_id) AS film_count
+    FROM film
+    JOIN inventory ON film.film_id = inventory.film_id
+    GROUP BY film.rating
+    ORDER BY COUNT(inventory.film_id) DESC
+    ```
+
+    This query counts how many films exist for each rating (G, PG, PG-13, R, NC-17) in the Sakila database. Your results will look like this:
+
+    | rating | film_count |
+    |--------|------------|
+    | PG-13  | 213        |
+    | NC-17  | 202        |
+    | R      | 189        |
+    | PG     | 183        |
+    | G      | 171        |
+  </Step>
+
+  <Step title="Save your query">
+    Click the **Save** button (or press `Ctrl+S` / `Cmd+S`) to save the query for future use. Saved queries appear in the sidebar under **Saved Queries** so you can reuse them any time.
+  </Step>
+</Steps>
+
+## What to explore next
+
+Now that you've got the basics down, here are some features worth exploring:
+
+<CardGroup cols={2}>
+  <Card title="Connect to a real database" icon="database" href="/connecting/overview">
+    Learn how to connect to PostgreSQL, MySQL, SQL Server, and other database engines, including SSH tunnel support.
+  </Card>
+  <Card title="Create and modify tables" icon="table" href="/user-guide/modify-tables">
+    Use the table designer to create new tables, add columns, and manage indexes without writing DDL by hand.
+  </Card>
+  <Card title="Export data" icon="download" href="/user-guide/data-export">
+    Export query results or full tables to CSV, JSON, and other formats with a few clicks.
+  </Card>
+  <Card title="Query magics" icon="wand-sparkles" href="/user-guide/query-magics">
+    Beautify and transform your query results automatically with Query Magics.
+  </Card>
+</CardGroup>
+
+## Get help
+
+If you're stuck, email the Beekeeper Studio team at [support@beekeeperstudio.io](mailto:support@beekeeperstudio.io). You can also [join the community Slack group](https://beekeeperstudio.io/slack) or [open an issue on GitHub](https://github.com/beekeeper-studio/beekeeper-studio).

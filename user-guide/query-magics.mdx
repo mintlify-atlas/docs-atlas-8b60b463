@@ -1,0 +1,179 @@
+---
+title: "Query Magics: Rich Result Formatting in Beekeeper"
+description: "Use Query Magics to transform SQL query results into clickable links, images, star ratings, progress bars, currency displays, and more by aliasing columns."
+---
+
+Query Magics are a Beekeeper Studio feature that lets you control how query result columns are rendered — turning raw values into clickable links, images, ratings, currency amounts, and more — simply by changing the column alias in your SQL. No configuration files or special setup required: the magic is in the column name itself.
+
+## How Query Magics work
+
+Append a magic suffix to a column alias using double-underscore (`__`) separators. Beekeeper detects the suffix and renders that column accordingly.
+
+```sql
+-- Basic syntax
+SELECT column_name AS columnname__format__<magic> FROM table;
+
+-- Real example: render a URL column as a clickable link
+SELECT url AS url__format__link FROM products;
+```
+
+## Available magics
+
+### Clickable link
+
+Makes a URL value clickable in the results grid.
+
+```sql
+SELECT website AS website__format__link FROM companies;
+```
+
+### Clickable email
+
+Renders an email address as a `mailto:` link that opens your default mail client.
+
+```sql
+SELECT contact AS contact__format__email FROM leads;
+```
+
+### Check / tick mark
+
+Displays `1` as a checkmark and `0` as a cross — useful for boolean columns stored as integers.
+
+```sql
+SELECT is_active AS is_active__format__check FROM users;
+```
+
+### Image
+
+Renders a URL as an inline image. You can optionally specify width and height in pixels.
+
+```sql
+-- Default size
+SELECT avatar_url AS avatar__format__image FROM users;
+
+-- Set width to 50px
+SELECT avatar_url AS avatar__format__image__50 FROM users;
+
+-- Set width 50px, height 100px
+SELECT avatar_url AS avatar__format__image__50__100 FROM users;
+```
+
+### Money / currency
+
+Formats a number as a localized currency amount. Defaults to USD.
+
+```sql
+-- USD (default)
+SELECT price AS price__format__money FROM products;
+
+-- British Pound
+SELECT price AS price__format__money__gbp FROM products;
+
+-- Colombian Peso
+SELECT price AS price__format__money__cop FROM products;
+```
+
+### Progress bar
+
+Displays a numeric value as a horizontal progress bar. Assumes a 0–100 range by default.
+
+```sql
+-- Default range 0-100
+SELECT completion_pct AS progress__format__progress FROM tasks;
+
+-- Custom max (0-10 range)
+SELECT score AS score__format__progress__10 FROM assessments;
+```
+
+### Star rating
+
+Renders a number as a star rating, as you would see on a review site. Defaults to a 0–5 scale.
+
+```sql
+-- Default 0-5 stars
+SELECT rating AS rating__format__stars FROM reviews;
+
+-- Custom max (0-10 stars)
+SELECT rating AS rating__format__stars__10 FROM reviews;
+```
+
+### Link to another table (goto)
+
+Creates a clickable link that navigates to another table in Beekeeper Studio, optionally filtering by a specific column. Works like a foreign key link in the Table View.
+
+```sql
+-- Link to the primary key of the users table
+SELECT user_id AS user_id__goto__users FROM orders;
+
+-- Link to a specific schema
+SELECT user_id AS user_id__goto__public__users FROM orders;
+
+-- Link to a table and filter by a specific column
+SELECT user_id AS user_id__goto__products__user_id FROM orders;
+```
+
+### Custom enum
+
+Replace numeric IDs with human-readable labels defined in an `enums.json` file in your Beekeeper user directory.
+
+<Tabs>
+  <Tab title="Windows">
+    `%APPDATA%\beekeeper-studio\enums.json`
+  </Tab>
+  <Tab title="Linux">
+    `~/.config/beekeeper-studio/enums.json`
+  </Tab>
+  <Tab title="macOS">
+    `~/Library/Application Support/beekeeper-studio/enums.json`
+  </Tab>
+</Tabs>
+
+Create the file with this structure:
+
+```json
+[
+  {
+    "name": "user_type",
+    "variants": [
+      { "id": "1", "value": "Default" },
+      { "id": "2", "value": "Admin" },
+      { "id": "3", "value": "Editor" },
+      { "id": "4", "value": "Viewer" },
+      { "id": "5", "value": "Guest" }
+    ]
+  },
+  {
+    "name": "account_type",
+    "variants": [
+      { "id": "1", "value": "Personal" },
+      { "id": "2", "value": "Business" },
+      { "id": "3", "value": "Enterprise" }
+    ]
+  }
+]
+```
+
+Then reference the enum by name in your query:
+
+```sql
+SELECT
+  user_type AS user_type__format__enum__user_type,
+  account_id AS account__format__enum__account_type
+FROM users;
+```
+
+Values matching an enum `id` are replaced with the corresponding `value` in the results grid.
+
+## Combining magics in one query
+
+You can use multiple magics in a single query — each column alias is independent.
+
+```sql
+SELECT
+  email        AS email__format__email,
+  profile_url  AS profile__format__link,
+  rating       AS rating__format__stars,
+  balance      AS balance__format__money__gbp,
+  user_id      AS user_id__goto__users
+FROM customers;
+```

@@ -1,0 +1,86 @@
+---
+title: "Connect to DuckDB in Beekeeper Studio"
+description: "Open DuckDB files by double-clicking or from the terminal. Query CSV, Parquet, and JSON files directly with SQL without importing them first."
+---
+
+DuckDB is an in-process analytical database that stores data in a single file — no server required. Beekeeper Studio makes connecting simple: open a `.duckdb` file by double-clicking it or selecting it from the connection screen. You can also query external files like CSVs and Parquet files directly with SQL.
+
+<Note>
+  DuckDB requires the **Ultimate** (paid) edition of Beekeeper Studio.
+</Note>
+
+## Connect from the app
+
+<Steps>
+  <Step title="Open the connection screen">
+    Launch Beekeeper Studio and open the connection screen.
+  </Step>
+  <Step title="Select DuckDB">
+    Choose **DuckDB** from the connection type dropdown.
+  </Step>
+  <Step title="Choose your database file">
+    Click the file picker and navigate to your `.duckdb` file.
+  </Step>
+  <Step title="Click Connect">
+    Press **Connect** to open the database.
+  </Step>
+</Steps>
+
+## Create a new DuckDB database
+
+<Steps>
+  <Step title="Select DuckDB">
+    Choose **DuckDB** from the connection type dropdown.
+  </Step>
+  <Step title="Create the file">
+    Click the **Create** button next to the **Database File** input, or type the path directly into the field.
+  </Step>
+  <Step title="Connect">
+    Click **Connect** to open the new database.
+  </Step>
+</Steps>
+
+## Open by double-clicking a file
+
+When you install Beekeeper Studio, it registers itself as the default app for the `.duckdb` file extension. As long as Beekeeper Studio remains the default, you can double-click any DuckDB file in your file browser to open it directly.
+
+## Open from the terminal
+
+<Tabs>
+  <Tab title="macOS">
+    ```bash
+    open ./path/to/example.duckdb
+    ```
+  </Tab>
+  <Tab title="Linux">
+    ```bash
+    xdg-open ./path/to/example.duckdb
+    ```
+  </Tab>
+</Tabs>
+
+## Query external files
+
+DuckDB can read CSV, Parquet, JSON, and other file formats directly with SQL — you don't need to import data into a table first.
+
+### Query a CSV file
+
+```sql
+SELECT * FROM 'path/to/data.csv';
+```
+
+### Query a Parquet file
+
+```sql
+SELECT * FROM 'path/to/data.parquet';
+```
+
+### Import a CSV into a table
+
+```sql
+CREATE TABLE my_table AS FROM 'path/to/data.csv';
+```
+
+<Tip>
+  DuckDB automatically infers column names and types from CSV and Parquet files. For more file format options and advanced configuration, see the [DuckDB documentation](https://duckdb.org/docs/stable/data/overview).
+</Tip>

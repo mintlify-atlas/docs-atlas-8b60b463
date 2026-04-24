@@ -1,97 +1,78 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: "Beekeeper Studio: Modern SQL Client for Every Database"
+description: "Beekeeper Studio is a cross-platform SQL editor for MySQL, PostgreSQL, SQLite, SQL Server, and 15+ databases. Available on Linux, macOS, and Windows."
 ---
 
-## Setting up
+Beekeeper Studio is a cross-platform desktop SQL editor and database manager designed to be fast, intuitive, and genuinely enjoyable to use. Whether you're exploring a local SQLite file or querying a production PostgreSQL cluster, Beekeeper gives you a clean, modern interface without sacrificing power.
 
-Get your documentation site up and running in minutes.
-
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
-
-## Make it yours
-
-Design a docs site that looks great and empowers your users.
-
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
+<CardGroup cols={2}>
+  <Card title="Get Started" icon="rocket" href="/getting-started">
+    Install Beekeeper Studio and connect to your first database in minutes
   </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
+  <Card title="Connect a Database" icon="database" href="/connecting/overview">
+    Set up connections for PostgreSQL, MySQL, SQLite, and 15+ other databases
   </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
+  <Card title="Write SQL Queries" icon="code" href="/user-guide/sql-editor">
+    Use the autocomplete SQL editor with syntax highlighting and query history
   </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
+  <Card title="Browse & Edit Data" icon="table" href="/user-guide/editing-data">
+    View, filter, sort, and edit table data with a visual interface
   </Card>
-</Columns>
+</CardGroup>
 
-## Create beautiful pages
+## What you can do with Beekeeper Studio
 
-Everything you need to create world-class documentation.
+<CardGroup cols={3}>
+  <Card title="Query Editor" icon="terminal" href="/user-guide/sql-editor">
+    Autocomplete, syntax highlighting, tabbed interface, and query history
+  </Card>
+  <Card title="Table Data Editor" icon="table-cells" href="/user-guide/editing-data">
+    Sort, filter, and inline-edit rows without writing SQL
+  </Card>
+  <Card title="Schema Management" icon="sitemap" href="/user-guide/modify-tables">
+    Create and modify tables, columns, indexes, and foreign keys
+  </Card>
+  <Card title="Import & Export" icon="arrow-right-arrow-left" href="/user-guide/data-export">
+    Export to CSV, JSON, Excel, and SQL; import from CSV and JSON
+  </Card>
+  <Card title="Cloud Workspaces" icon="cloud" href="/user-guide/cloud-workspaces">
+    Share connections and saved queries with your team in the cloud
+  </Card>
+  <Card title="Plugins" icon="puzzle-piece" href="/user-guide/plugins">
+    Extend Beekeeper Studio with the AI Shell and community plugins
+  </Card>
+</CardGroup>
 
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
-  </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
-  </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
-  </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
+## Supported databases
 
-## Need inspiration?
+Beekeeper Studio supports **20+ databases** with full feature parity across all platforms:
 
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
-</Card>
+<CardGroup cols={2}>
+  <Card title="Community Edition" icon="users" href="/support/editions">
+    PostgreSQL, MySQL, SQLite, SQL Server, MariaDB, CockroachDB, TiDB, BigQuery, Amazon Redshift, Redis
+  </Card>
+  <Card title="Ultimate Edition" icon="star" href="/support/editions">
+    All community databases plus Oracle, Cassandra, ClickHouse, DuckDB, MongoDB, Firebird, LibSQL, SurrealDB, Trino, and more
+  </Card>
+</CardGroup>
+
+## Quick start
+
+<Steps>
+  <Step title="Download Beekeeper Studio">
+    Visit [beekeeperstudio.io](https://beekeeperstudio.io/get-community) and download the installer for your operating system — macOS, Windows, or Linux.
+  </Step>
+  <Step title="Install the application">
+    Run the installer and follow the on-screen instructions. See [installation guides](/installation/index) for platform-specific details.
+  </Step>
+  <Step title="Create a connection">
+    Click **New Connection**, select your database type, enter your credentials, and click **Connect**.
+  </Step>
+  <Step title="Start exploring">
+    Browse tables in the sidebar, open the SQL editor, and start querying your data.
+  </Step>
+</Steps>
+
+<Note>
+  Beekeeper Studio is free to download with no sign-up or credit card required. Premium features are available with a paid subscription. [Compare editions](/support/editions) to learn more.
+</Note>

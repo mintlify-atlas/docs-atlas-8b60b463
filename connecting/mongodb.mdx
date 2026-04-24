@@ -1,0 +1,64 @@
+---
+title: "Connect to MongoDB in Beekeeper Studio"
+description: "Browse, filter, and edit MongoDB collections using a table view, SQL queries, or a REPL shell. Requires the Ultimate edition. Early implementation."
+---
+
+Beekeeper Studio supports MongoDB, giving you a familiar table-based interface to browse collections, sort and filter data, edit documents, and run queries — either using SQL or directly against the MongoDB shell. MongoDB support is in active development, with new features added regularly.
+
+<Note>
+  MongoDB requires the **Ultimate** (paid) edition of Beekeeper Studio.
+</Note>
+
+<Warning>
+  MongoDB support is an early implementation. Core features work, but some capabilities are still in progress. Check back frequently for updates.
+</Warning>
+
+## What's supported
+
+<CardGroup cols={2}>
+  <Card title="Table data view" icon="table">
+    Browse collection documents in a structured table layout.
+  </Card>
+  <Card title="Sort and filter" icon="filter">
+    Sort documents by field and apply filters to narrow down results.
+  </Card>
+  <Card title="Table structure view" icon="list">
+    Inspect the shape of your collections.
+  </Card>
+  <Card title="Entity sidebar" icon="sidebar">
+    Navigate your databases and collections from the sidebar.
+  </Card>
+  <Card title="Edit data" icon="pen">
+    Modify document values directly in the table view.
+  </Card>
+  <Card title="Query REPL" icon="terminal">
+    Run queries against your MongoDB instance in a REPL-style shell.
+  </Card>
+  <Card title="SQL against MongoDB" icon="code">
+    Write SQL and have Beekeeper Studio translate it for MongoDB.
+  </Card>
+  <Card title="Import / Export" icon="arrow-right-arrow-left">
+    Import and export collection data.
+  </Card>
+  <Card title="Backup / Restore" icon="clock-rotate-left">
+    Back up and restore your MongoDB data.
+  </Card>
+  <Card title="Schema editing" icon="sliders">
+    Modify collection schemas.
+  </Card>
+  <Card title="Read-only mode" icon="lock">
+    Connect in read-only mode to prevent accidental writes.
+  </Card>
+</CardGroup>
+
+## Still in progress
+
+- SSH tunneling
+
+## Connect from the app
+
+To connect to MongoDB, select **MongoDB** from the connection type dropdown and enter your connection string or individual connection fields (host, port, username, password, and database). Click **Connect** when ready.
+
+<Tip>
+  MongoDB connection strings follow the format `mongodb://username:password@host:27017/database`. You can paste one into the URL import box at the top of the connection form.
+</Tip>

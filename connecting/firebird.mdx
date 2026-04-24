@@ -1,0 +1,67 @@
+---
+title: "Connect to Firebird in Beekeeper Studio"
+description: "Connect to Firebird 3+ using legacy authentication mode. Requires configuration changes to firebird.conf on your Firebird server. Requires the Ultimate edition."
+---
+
+Beekeeper Studio connects to Firebird using the legacy authentication plugin, which requires a small configuration change on your Firebird server. This applies to Firebird 3 and later.
+
+<Note>
+  Firebird requires the **Ultimate** (paid) edition of Beekeeper Studio.
+</Note>
+
+<Warning>
+  The legacy authentication plugin (`Legacy_Auth`) sends passwords over the wire **unencrypted** and limits usable password length to 8 bytes (longer passwords are silently truncated). If security is a concern, evaluate whether this trade-off is acceptable for your environment before proceeding.
+</Warning>
+
+## Configure your Firebird server
+
+You need to edit `firebird.conf` on the server to enable legacy authentication. The file is typically found at:
+
+| Operating system | Default path |
+|---|---|
+| Linux or macOS | `/opt/firebird/firebird.conf` |
+| Windows | `%ProgramFiles%\Firebird\Firebird_5_0\firebird.conf` |
+
+<Tabs>
+  <Tab title="Firebird 3">
+    Add the following lines to `firebird.conf`:
+
+    ```text
+    AuthServer = Srp, Legacy_Auth
+    WireCrypt = Enabled
+    UserManager = Legacy_UserManager
+    ```
+  </Tab>
+  <Tab title="Firebird 4+">
+    Add the following lines to `firebird.conf`:
+
+    ```text
+    AuthServer = Srp256, Srp, Legacy_Auth
+    WireCrypt = Enabled
+    UserManager = Legacy_UserManager
+    ```
+  </Tab>
+</Tabs>
+
+After saving `firebird.conf`, restart the Firebird service for the changes to take effect.
+
+## Connect from Beekeeper Studio
+
+<Steps>
+  <Step title="Open the connection screen">
+    Launch Beekeeper Studio and open the connection screen.
+  </Step>
+  <Step title="Select Firebird">
+    Choose **Firebird** from the connection type dropdown.
+  </Step>
+  <Step title="Enter connection details">
+    Fill in the **host**, **port** (default: `3050`), **database path**, **username**, and **password**.
+  </Step>
+  <Step title="Connect">
+    Click **Connect**.
+  </Step>
+</Steps>
+
+<Note>
+  If the connection fails, verify that your `firebird.conf` changes were saved, the service was restarted, and that `Legacy_Auth` appears in the `AuthServer` list.
+</Note>

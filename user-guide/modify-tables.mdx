@@ -1,0 +1,85 @@
+---
+title: "Creating and Altering Tables with Structure View"
+description: "Use Beekeeper Studio's Structure View to create new tables, add or modify columns, manage indexes, foreign keys, and triggers without writing SQL."
+---
+
+Beekeeper Studio's Structure View lets you create and alter database tables through a point-and-click interface — no SQL required. You can define columns, set primary keys, manage indexes, configure relations, and add triggers, all from within the app. For cases where you want the generated SQL, Beekeeper provides a **Copy to SQL** option so you can review or customize it before executing.
+
+## Creating a new table
+
+<Steps>
+  <Step title="Open the table creator">
+    Click the **+** button at the top of the entities list in the left sidebar to open the table creation interface.
+  </Step>
+  <Step title="Define your columns">
+    Add and remove columns using the table builder. Set the name, data type, and nullability for each column.
+  </Step>
+  <Step title="Set a primary key">
+    By default, Beekeeper includes an `id` autoincrement column set as the primary key. Check multiple columns to create a compound primary key.
+  </Step>
+  <Step title="Create the table">
+    Click **Create Table** in the bottom-right to execute the statement. Alternatively, click **Copy to SQL** to open the generated `CREATE TABLE` syntax in a new SQL editor tab for review.
+  </Step>
+</Steps>
+
+### Autoincrement columns
+
+When you create a new table, Beekeeper automatically adds an autoincrement primary key column to streamline setup. This behavior is consistent across all supported database types. You can add as many autoincrement columns as needed, or remove the default and define your own primary key.
+
+```sql
+-- Example of what Beekeeper generates for a simple new table
+CREATE TABLE products (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name VARCHAR(255) NOT NULL,
+  price DECIMAL(10, 2),
+  created_at TIMESTAMP
+);
+```
+
+<Note>
+  Indexes and foreign keys can only be added after the table is initially created. Use the **Structure View** on the existing table to configure them.
+</Note>
+
+## Altering an existing table
+
+Right-click any table in the sidebar and select **View Structure** to open the Structure View for that table.
+
+The Structure View for an existing table includes all the same column-editing capabilities as the table creator, plus:
+
+<CardGroup cols={2}>
+  <Card title="Indexes" icon="list">
+    Add, modify, or remove indexes to optimize query performance on frequently searched columns.
+  </Card>
+  <Card title="Foreign keys" icon="link">
+    Define relations between tables. Set the referenced table, column, and cascade behavior (ON DELETE, ON UPDATE).
+  </Card>
+  <Card title="Triggers" icon="bolt">
+    Create and manage triggers that fire before or after data modification events.
+  </Card>
+  <Card title="Column changes" icon="pencil">
+    Rename columns, change data types, toggle nullability, or set default values on existing columns.
+  </Card>
+</CardGroup>
+
+## Database compatibility
+
+Not all database engines support every type of schema modification. When a particular operation is unsupported, Beekeeper Studio disables that section and displays a warning so you always know what is and is not possible for your current connection.
+
+<AccordionGroup>
+  <Accordion title="PostgreSQL">
+    Full support for column alterations, indexes, foreign keys, and triggers.
+  </Accordion>
+  <Accordion title="MySQL / MariaDB">
+    Full support for column alterations, indexes, and foreign keys. Trigger support available.
+  </Accordion>
+  <Accordion title="SQLite">
+    Limited ALTER TABLE support — SQLite does not support dropping or modifying columns in older versions. Beekeeper reflects these constraints in the UI.
+  </Accordion>
+  <Accordion title="SQL Server">
+    Full support for column alterations, indexes, and foreign keys.
+  </Accordion>
+</AccordionGroup>
+
+## Try the online table creator
+
+Want to experiment with table creation without a live database? The [SQL Tools website](https://sqltools.beekeeperstudio.io/build) hosts a stripped-down version of Beekeeper's table creator that generates `CREATE TABLE` SQL you can download and use anywhere.

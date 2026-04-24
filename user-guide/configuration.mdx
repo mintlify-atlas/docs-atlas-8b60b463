@@ -1,0 +1,187 @@
+---
+title: "Configuring Beekeeper Studio with INI Files"
+description: "Customize Beekeeper Studio with INI configuration files — adjust security, shortcuts, timeouts, and UI behavior, or enforce settings org-wide."
+---
+
+Beekeeper Studio uses a layered INI configuration system that lets you customize the app to match your workflow, and gives administrators a way to enforce settings for all users on managed machines. Configuration files use standard INI syntax: section headers in `[brackets]`, key-value pairs separated by `=`, and comments starting with `;`.
+
+## Configuration file types
+
+There are three tiers of configuration, loaded in this order:
+
+| Config file | Purpose | Load order |
+|---|---|---|
+| `default.config.ini` | Baseline settings that ship with the app | First |
+| `user.config.ini` | Your personal customizations | Second |
+| `system.config.ini` | Machine-wide settings controlled by an administrator | Third |
+
+Settings loaded later override earlier ones. Administrator (`system.config.ini`) settings always win, which lets IT teams enforce policies like PIN lock or auto-disconnect without users being able to change them.
+
+## File locations
+
+<Tabs>
+  <Tab title="Windows">
+    | Config type | Path |
+    |---|---|
+    | User config | `%APPDATA%\beekeeper-studio\user.config.ini` |
+    | Admin config | `%PROGRAMDATA%\beekeeper-studio\system.config.ini` |
+  </Tab>
+  <Tab title="macOS">
+    | Config type | Path |
+    |---|---|
+    | User config | `~/Library/Application Support/beekeeper-studio/user.config.ini` |
+    | Admin config | `/Library/Application Support/beekeeper-studio/system.config.ini` |
+  </Tab>
+  <Tab title="Linux">
+    | Config type | Path |
+    |---|---|
+    | User config | `~/.config/beekeeper-studio/user.config.ini` |
+    | Admin config | `/etc/beekeeper-studio/system.config.ini` |
+  </Tab>
+</Tabs>
+
+## Getting started
+
+<Steps>
+  <Step title="Create your configuration file">
+    If the file doesn't exist yet, create it in a text editor at the appropriate path for your OS. You only need to include the settings you want to change — defaults apply to everything else.
+
+    ```ini
+    ; My Beekeeper Studio configuration
+    ; Lines starting with semicolons are comments
+
+    [ui.tableTable]
+    pageSize = 200    ; Show 200 rows per page instead of the default 100
+    ```
+  </Step>
+  <Step title="Save and restart">
+    Save the file and restart Beekeeper Studio. Configuration changes take effect on the next launch.
+  </Step>
+</Steps>
+
+<Warning>
+  If your changes aren't taking effect, check that:
+  - The file is in the correct directory for your OS
+  - INI syntax is valid (section headers in `[brackets]`, spaces around `=`)
+  - You've fully restarted the application
+  - Section names and setting keys have no typos
+  - The file is readable by Beekeeper Studio
+</Warning>
+
+## Configuration reference
+
+### General settings
+
+```ini
+[general]
+checkForUpdatesInterval = 86400000    ; How often to check for updates (ms). Default: 24 hours
+checkForUpdatesDisabled = false       ; Set to true to disable automatic update checks
+dataSyncInterval = 30000              ; How often to sync data (ms). Default: 30 seconds
+workspaceSyncInterval = 5000          ; How often to sync workspace (ms). Default: 5 seconds
+```
+
+### Security settings
+
+```ini
+[security]
+lockMode = disabled          ; Options: disabled, pin — requires PIN entry before connecting
+disconnectOnSuspend = false  ; Disconnect when system suspends/sleeps
+disconnectOnLock = false     ; Disconnect when screen is locked
+disconnectOnIdle = false     ; Disconnect after idle period
+idleThresholdSeconds = 300   ; Seconds before user is considered idle
+idleCheckIntervalSeconds = 30
+minPinLength = 6             ; Minimum PIN length when lockMode = pin
+```
+
+For more on security settings and enterprise hardening, see the [Security docs](/user-guide/security).
+
+### UI settings
+
+```ini
+[ui.general]
+binaryEncoding = hex         ; How to display binary data. Options: hex, base64
+
+[ui.queryEditor]
+maxResults = 50000           ; Maximum rows returned in the query editor
+
+[ui.tableTable]
+pageSize = 100               ; Rows per page in the table viewer
+largeFieldWidth = 300        ; Width of large field columns (px)
+maxColumnWidth = 1000        ; Maximum column width (px)
+minColumnWidth = 100         ; Minimum column width (px)
+defaultColumnWidth = 125     ; Default column width (px)
+```
+
+### Database connection settings
+
+```ini
+[db.default]
+maxConnections = 8                  ; Max connections in the pool
+maxReservedConnections = 2          ; Max manual transaction connections
+manualTransactionTimeout = 600000   ; Auto-rollback inactive transactions after (ms). Default: 10 min
+allowSkipToLastPage = false         ; Allow jumping to last page in table view (uses COUNT query)
+
+[db.mysql]
+connectTimeout = 3600000
+allowSkipToLastPage = true
+maxConnections = 10
+
+[db.postgres]
+connectionTimeout = 15000           ; Timeout for new connections (ms)
+idleTimeout = 20000                 ; Idle connection timeout (ms)
+allowSkipToLastPage = true
+```
+
+### Keyboard shortcuts
+
+```ini
+[keybindings.general]
+refresh[] = f5
+refresh[] = ctrlOrCmd+r
+save = ctrlOrCmd+s
+openQuickSearch = ctrlOrCmd+p
+
+[keybindings.queryEditor]
+submitTabQuery[] = ctrlOrCmd+enter
+submitTabQuery[] = f5
+submitCurrentQuery[] = ctrlOrCmd+shift+enter
+manualCommit = ctrlOrCmd+shift+c
+manualRollback = ctrlOrCmd+shift+r
+
+[keybindings.tab]
+closeTab = ctrlOrCmd+w
+nextTab[] = ctrl+tab
+previousTab[] = ctrl+shift+tab
+reopenLastClosedTab = ctrlOrCmd+shift+t
+```
+
+### Plugin system settings
+
+```ini
+[pluginSystem]
+disabled = false              ; Set to true to disable plugins entirely
+communityDisabled = false     ; Set to true to block community plugins
+
+; When disabled = true, restrict to only these plugins:
+; allow[] = bks-ai-shell
+
+[plugins.bks-ai-shell]
+disabled = false              ; Set to true to disable the AI Shell plugin
+```
+
+## Enterprise deployment
+
+To enforce settings across all managed machines, create a `system.config.ini` file and deploy it to the administrator configuration path for each OS. Users cannot override settings defined in this file.
+
+A minimal enterprise security configuration:
+
+```ini
+[security]
+lockMode = pin
+disconnectOnSuspend = true
+disconnectOnLock = true
+disconnectOnIdle = true
+idleThresholdSeconds = 300
+```
+
+See [Security](/user-guide/security) for a full walkthrough of enterprise security recommendations.

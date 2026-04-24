@@ -1,0 +1,431 @@
+---
+title: "Create Your First Beekeeper Studio Plugin"
+description: "Build your first Beekeeper Studio plugin from scratch using Vite or plain HTML/JS, connect it to the database API, and sync it with the app theme in minutes."
+---
+
+This guide walks you through building a simple Hello World plugin that opens as a new tab in Beekeeper Studio, lists database tables, and adapts to the application's color theme. You can choose between a Vite-based project (recommended for a better development experience) or a minimal no-build setup.
+
+<Warning>
+  The plugin system is in beta and available in Beekeeper Studio 5.3+. We'd love your feedback!
+</Warning>
+
+## Prerequisites
+
+- Basic knowledge of HTML, CSS, and JavaScript
+- Node.js and npm or yarn installed (required for the Vite option)
+- Beekeeper Studio 5.3 or later installed
+
+## Choose your setup
+
+<Tabs>
+  <Tab title="Vite (recommended)">
+
+The Vite option gives you Hot Module Replacement (HMR): changes to your plugin's source code appear in Beekeeper Studio automatically without restarting the application.
+
+<Steps>
+
+<Step title="Create a Vite project">
+
+<CodeGroup>
+
+```bash npm
+npm create vite@latest hello-world-plugin
+cd hello-world-plugin
+```
+
+```bash yarn
+yarn create vite hello-world-plugin
+cd hello-world-plugin
+```
+
+</CodeGroup>
+
+</Step>
+
+<Step title="Install the Beekeeper Studio packages">
+
+<CodeGroup>
+
+```bash npm
+npm install @beekeeperstudio/plugin @beekeeperstudio/vite-plugin
+```
+
+```bash yarn
+yarn add @beekeeperstudio/plugin @beekeeperstudio/vite-plugin
+```
+
+</CodeGroup>
+
+</Step>
+
+<Step title="Configure Vite">
+
+Create or replace `vite.config.ts` in the project root:
+
+```typescript vite.config.ts
+import { defineConfig } from 'vite'
+import bks from '@beekeeperstudio/vite-plugin'
+
+export default defineConfig({
+  plugins: [bks()],
+})
+```
+
+</Step>
+
+<Step title="Create the manifest">
+
+Create `manifest.json` in the project root. This file tells Beekeeper Studio about your plugin and the views it provides:
+
+```json manifest.json
+{
+  "id": "hello-world-plugin",
+  "name": "Hello World Plugin",
+  "author": {
+    "name": "Your Name",
+    "url": "https://yourwebsite.com"
+  },
+  "description": "My first awesome plugin!",
+  "version": "1.0.0",
+  "icon": "extension",
+  "manifestVersion": 1,
+  "capabilities": {
+    "views": [
+      {
+        "id": "hello-world-view",
+        "name": "Hello World",
+        "type": "shell-tab",
+        "entry": "dist/index.html"
+      }
+    ],
+    "menu": [
+      {
+        "command": "say-hello",
+        "name": "New Hello World",
+        "view": "hello-world-view",
+        "placement": "newTabDropdown"
+      }
+    ]
+  }
+}
+```
+
+</Step>
+
+<Step title="Link the plugin to Beekeeper Studio">
+
+Create a symbolic link from the Beekeeper Studio plugins directory to your project folder. This lets you work in your project directory while Beekeeper Studio picks up changes automatically.
+
+<Tabs>
+  <Tab title="Linux">
+    ```bash
+    ln -s $(pwd) ~/.config/beekeeper-studio/plugins/hello-world-plugin
+    ```
+  </Tab>
+  <Tab title="macOS">
+    ```bash
+    ln -s $(pwd) "~/Library/Application Support/beekeeper-studio/plugins/hello-world-plugin"
+    ```
+  </Tab>
+  <Tab title="Windows">
+    ```cmd
+    mklink /D "%APPDATA%\beekeeper-studio\plugins\hello-world-plugin" "%CD%"
+    ```
+  </Tab>
+  <Tab title="Windows (Portable)">
+    ```cmd
+    mklink /D "{beekeeper-studio-directory}\beekeeper-studio-data\plugins\hello-world-plugin" "%CD%"
+    ```
+  </Tab>
+</Tabs>
+
+<Tip>
+  Using a symbolic link keeps your project wherever you want it and prevents Beekeeper Studio's plugin manager from accidentally uninstalling it.
+</Tip>
+
+</Step>
+
+<Step title="Start the development server">
+
+<CodeGroup>
+
+```bash npm
+npm run dev
+```
+
+```bash yarn
+yarn dev
+```
+
+</CodeGroup>
+
+Changes to your source code now update the plugin inside Beekeeper Studio in real time.
+
+</Step>
+
+</Steps>
+
+  </Tab>
+  <Tab title="No build tools">
+
+If you don't need hot reload or a build pipeline, you only need two files: `manifest.json` and `index.html`.
+
+<Steps>
+
+<Step title="Create your plugin folder">
+
+```bash
+mkdir hello-world-plugin
+cd hello-world-plugin
+```
+
+Then link it to Beekeeper Studio's plugins directory:
+
+<Tabs>
+  <Tab title="Linux">
+    ```bash
+    ln -s $(pwd) ~/.config/beekeeper-studio/plugins/hello-world-plugin
+    ```
+  </Tab>
+  <Tab title="macOS">
+    ```bash
+    ln -s $(pwd) "~/Library/Application Support/beekeeper-studio/plugins/hello-world-plugin"
+    ```
+  </Tab>
+  <Tab title="Windows">
+    ```cmd
+    mklink /D "%APPDATA%\beekeeper-studio\plugins\hello-world-plugin" "%CD%"
+    ```
+  </Tab>
+  <Tab title="Windows (Portable)">
+    ```cmd
+    mklink /D "{beekeeper-studio-directory}\beekeeper-studio-data\plugins\hello-world-plugin" "%CD%"
+    ```
+  </Tab>
+</Tabs>
+
+</Step>
+
+<Step title="Create the manifest">
+
+```json manifest.json
+{
+  "id": "hello-world-plugin",
+  "name": "Hello World Plugin",
+  "author": {
+    "name": "Your Name",
+    "url": "https://yourwebsite.com"
+  },
+  "description": "My first awesome plugin!",
+  "version": "1.0.0",
+  "icon": "extension",
+  "manifestVersion": 1,
+  "capabilities": {
+    "views": [
+      {
+        "id": "hello-world-view",
+        "name": "Hello World",
+        "type": "shell-tab",
+        "entry": "index.html"
+      }
+    ],
+    "menu": [
+      {
+        "command": "say-hello",
+        "name": "New Hello World",
+        "view": "hello-world-view",
+        "placement": "newTabDropdown"
+      }
+    ]
+  }
+}
+```
+
+</Step>
+
+<Step title="Create the HTML page">
+
+```html index.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hello World Plugin</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      margin: 0;
+      padding: 2rem;
+      background-color: #f8f9fa;
+      color: #333;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    h1 { color: #2d3748; margin-bottom: 1rem; }
+    p  { color: #4a5568; margin-bottom: 1.5rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Your plugin works!</h1>
+    <p>Edit this HTML and reload to see changes.</p>
+  </div>
+</body>
+</html>
+```
+
+Your project structure is now:
+
+```
+hello-world-plugin/
+├── manifest.json
+└── index.html
+```
+
+</Step>
+
+</Steps>
+
+  </Tab>
+</Tabs>
+
+## Test your plugin
+
+<Steps>
+
+<Step title="Open Beekeeper Studio and check Plugin Manager">
+  Go to **Tools → Manage Plugins**. You should see **Hello World Plugin** listed.
+</Step>
+
+<Step title="Open a database connection">
+  Connect to any database you have access to.
+</Step>
+
+<Step title="Open the plugin tab">
+  Click the dropdown arrow next to the **+** button in the tab bar, then select **New Hello World** from the menu. Your plugin opens in a new tab.
+</Step>
+
+</Steps>
+
+## Read database tables
+
+The `@beekeeperstudio/plugin` package provides API functions to interact with the connected database. Install it if you haven't already:
+
+<CodeGroup>
+
+```bash npm
+npm install @beekeeperstudio/plugin
+```
+
+```bash yarn
+yarn add @beekeeperstudio/plugin
+```
+
+</CodeGroup>
+
+Create `main.js` and add the following:
+
+```javascript main.js
+// Forwards keyboard and mouse events from the iframe to the host app
+import "@beekeeperstudio/plugin/dist/eventForwarder.js";
+import { getTables } from "@beekeeperstudio/plugin";
+
+async function showTables() {
+  try {
+    const tables = await getTables();
+    const tablesDiv = document.querySelector(".tables");
+    tablesDiv.innerHTML = `<strong>Tables:</strong> ${tables.map(t => t.name).join(", ")}`;
+    tablesDiv.classList.add("show");
+  } catch (error) {
+    console.error("Failed to get tables:", error);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelector("#show-tables-btn").addEventListener("click", showTables);
+});
+```
+
+Update your `index.html` to include the button and script reference:
+
+```html
+<button id="show-tables-btn">Show Database Tables</button>
+<div class="tables"></div>
+<script type="module" src="main.js"></script>
+```
+
+## Sync with the app theme
+
+Beekeeper Studio exposes CSS variables for its color system. You can apply them dynamically and listen for theme change notifications to keep your plugin visually consistent with the rest of the application.
+
+Add a style tag for theme injection in `<head>`:
+
+```html
+<style id="app-theme"></style>
+```
+
+Update your JavaScript to apply the theme on load and whenever it changes:
+
+```javascript main.js
+import "@beekeeperstudio/plugin/dist/eventForwarder.js";
+import { getTables, addNotificationListener, getAppInfo } from "@beekeeperstudio/plugin";
+
+function applyTheme(theme) {
+  document.querySelector("#app-theme").textContent =
+    `:root { ${theme.cssString} }`;
+}
+
+// Apply the current theme on startup
+getAppInfo().then((app) => applyTheme(app.theme));
+
+// Re-apply whenever the user switches themes
+addNotificationListener("themeChanged", (theme) => applyTheme(theme));
+
+async function showTables() {
+  try {
+    const tables = await getTables();
+    const tablesDiv = document.querySelector(".tables");
+    tablesDiv.innerHTML = `<strong>Tables:</strong> ${tables.map(t => t.name).join(", ")}`;
+    tablesDiv.classList.add("show");
+  } catch (error) {
+    console.error("Failed to get tables:", error);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelector("#show-tables-btn").addEventListener("click", showTables);
+});
+```
+
+Replace any hard-coded colors in your CSS with theme variables:
+
+```css
+body {
+  background-color: var(--query-editor-bg);
+  color: var(--text-dark);
+}
+
+button {
+  background: var(--theme-base);
+}
+
+.tables {
+  background: var(--brand-success-light);
+}
+```
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Plugin API reference" icon="code" href="/plugin-dev/api-reference">
+    Explore all available functions: database queries, storage, notifications, clipboard, and more.
+  </Card>
+  <Card title="Publish your plugin" icon="upload" href="/plugin-dev/publishing">
+    Package your plugin and submit it to the Beekeeper Studio plugin registry.
+  </Card>
+</CardGroup>

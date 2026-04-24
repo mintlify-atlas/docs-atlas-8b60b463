@@ -1,0 +1,106 @@
+---
+title: "Connect to Oracle Database in Beekeeper Studio"
+description: "Connect to Oracle Database in thin or thick mode. Thick mode requires Oracle Instant Client. Supports connection strings, SID, service name, and tnsnames.ora."
+---
+
+Beekeeper Studio supports Oracle Database connections in two modes: thin mode (no extra software required) and thick mode (requires Oracle Instant Client). Most users should start with thin mode and switch to thick mode only if they need advanced connection options or encounter thin-mode errors.
+
+<Note>
+  Oracle Database requires the **Ultimate** (paid) edition of Beekeeper Studio.
+</Note>
+
+## Connection modes
+
+<CardGroup cols={2}>
+  <Card title="Thin mode" icon="bolt">
+    The default. No additional software required. Not all advanced connection options are available. Use this unless you hit a thin-mode error.
+  </Card>
+  <Card title="Thick mode" icon="layer-group">
+    Requires Oracle Instant Client. Supports more advanced options and is recommended for production environments.
+  </Card>
+</CardGroup>
+
+For a detailed comparison, see the [Oracle node-oracledb documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/appendix_a.html#oracle-database-features-supported-by-node-oracledb).
+
+## Thick mode requirements
+
+<Steps>
+  <Step title="Install Oracle Instant Client">
+    Download the Instant Client for your operating system from the [Oracle website](https://www.oracle.com/cis/database/technologies/instant-client/downloads.html). Choose the package that matches your OS.
+  </Step>
+  <Step title="Install libaio on Linux">
+    On Debian/Ubuntu-based systems:
+
+    ```bash
+    sudo apt-get install libaio1 libaio-dev
+    ```
+
+    On Red Hat/Fedora-based systems:
+
+    ```bash
+    sudo yum install libaio
+    ```
+  </Step>
+  <Step title="Create a symlink on Ubuntu 24.04+">
+    Ubuntu 24.04 and later rename the library. Create a symlink so Oracle can find it:
+
+    ```bash
+    sudo ln -s /usr/lib/x86_64-linux-gnu/libaio.so.1t64 /usr/lib/x86_64-linux-gnu/libaio.so.1
+    ```
+  </Step>
+</Steps>
+
+## Connect from Beekeeper Studio
+
+<Steps>
+  <Step title="Open the connection screen">
+    Launch Beekeeper Studio and open the connection screen.
+  </Step>
+  <Step title="Select Oracle Database">
+    Choose **Oracle Database** from the connection type dropdown.
+  </Step>
+  <Step title="Choose thick or thin mode">
+    If you need thick mode, enable it in the connection form. Thin mode is selected by default.
+  </Step>
+  <Step title="Enter your connection details">
+    Fill in your credentials using one of the supported connection methods (see below).
+  </Step>
+  <Step title="Connect">
+    Click **Connect**.
+  </Step>
+</Steps>
+
+## Connection methods
+
+Beekeeper Studio supports several ways to specify your Oracle connection target.
+
+<AccordionGroup>
+  <Accordion title="Host and port">
+    Enter the **host**, **port** (default: `1521`), and **service name or SID** directly in the form fields. This is the simplest approach for most connections.
+  </Accordion>
+  <Accordion title="Connection string">
+    Enter an Oracle connection string in the connection string field. Common formats:
+
+    ```text
+    # PDB connection string
+    host:port/PDB
+
+    # SID or service name
+    host:port/SID_or_service_name
+
+    # Long form with service name
+    (DESCRIPTION=(ADDRESS=(host=host_name)(protocol=TCP)(port=port_number))
+          (CONNECT_DATA=(SERVICE_NAME=service_name)))
+
+    # Long form with SID
+    (DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(Host=host_name)(Port=port))(CONNECT_DATA=(SID=sid_here)))
+    ```
+  </Accordion>
+  <Accordion title="TSA alias (tnsnames.ora)">
+    Specify your Oracle **config directory** in the connection form. Beekeeper Studio will locate your `tnsnames.ora` file in that directory and let you use an alias instead of a full connection string.
+  </Accordion>
+</AccordionGroup>
+
+<Tip>
+  If you receive a thin-mode error, switch to thick mode and make sure Oracle Instant Client is installed and accessible on your system's library path.
+</Tip>

@@ -1,0 +1,55 @@
+---
+title: "Connect to ClickHouse in Beekeeper Studio"
+description: "Connect to ClickHouse via native port 9000 with optional TLS/SSL and SSH tunneling. Test your connection before saving. Requires the Ultimate edition."
+---
+
+Beekeeper Studio supports ClickHouse connections over the native binary protocol (port 9000 by default). You can connect with or without TLS and route your connection through an SSH tunnel if your ClickHouse server is on a private network.
+
+<Note>
+  ClickHouse requires the **Ultimate** (paid) edition of Beekeeper Studio.
+</Note>
+
+## Connection details
+
+| Field | Default | Description |
+|---|---|---|
+| Host | — | IP address or hostname of your ClickHouse server |
+| Port | `9000` | Native protocol port (change if your server uses a custom port) |
+| Username | `default` | ClickHouse username |
+| Password | — | ClickHouse password (leave blank if none) |
+
+## Connect from the app
+
+<Steps>
+  <Step title="Open the connection screen">
+    Launch Beekeeper Studio and open the connection screen.
+  </Step>
+  <Step title="Select ClickHouse">
+    Choose **ClickHouse** from the connection type dropdown.
+  </Step>
+  <Step title="Enter your connection details">
+    Fill in the **host**, **port**, **username**, and **password** fields.
+  </Step>
+  <Step title="Test your connection">
+    Click **Test Connection** to verify that Beekeeper Studio can reach your ClickHouse server. If the test fails, double-check the host, port, and credentials.
+  </Step>
+  <Step title="Save and connect">
+    Enter a name for the connection, check **Save Passwords** if you want to persist your password, and click **Save**. Then click **Connect**.
+  </Step>
+</Steps>
+
+## TLS / SSL
+
+If your ClickHouse server requires a secure connection, expand the **TLS/SSL** section in the connection form and configure the following as needed:
+
+- **CA certificate** — the certificate authority file for verifying the server's certificate.
+- **Client certificate** — your client certificate file for mutual TLS.
+- **Client key** — the private key corresponding to your client certificate.
+
+<Tip>
+  If you're connecting to ClickHouse Cloud, TLS is required. Use "Trust the server" mode (no certificate files) unless your administrator has provided specific certificates.
+</Tip>
+
+## SSH tunneling
+
+If your ClickHouse server is on a private network, use Beekeeper Studio's SSH tunnel feature to reach it securely. Expand the **SSH Tunnel** section in the connection form and follow the [SSH tunneling guide](/connecting/overview#ssh-tunneling).

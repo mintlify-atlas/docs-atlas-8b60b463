@@ -1,0 +1,87 @@
+---
+title: "Connect to PostgreSQL in Beekeeper Studio"
+description: "Connect to local or remote PostgreSQL databases with host/port, SSL certificates, and SSH tunneling. Fully supported in the free Community edition."
+---
+
+PostgreSQL is one of the most widely used open-source relational databases, and Beekeeper Studio provides full support for it — including SSL, SSH tunneling, and connection URL import. You can connect to any PostgreSQL server version 9.4 and later.
+
+<Note>
+  PostgreSQL is available in the free **Community** edition of Beekeeper Studio.
+</Note>
+
+## Connection details
+
+To connect to a PostgreSQL database, you need the following information:
+
+| Field | Default | Description |
+|---|---|---|
+| Host | `localhost` | Hostname or IP address of the PostgreSQL server |
+| Port | `5432` | Port the server listens on |
+| Database | — | Name of the database to connect to |
+| Username | — | PostgreSQL username |
+| Password | — | PostgreSQL password (leave blank if none) |
+| SSL | Off | Enable for encrypted connections |
+
+## Connect from the app
+
+<Steps>
+  <Step title="Open the connection screen">
+    Launch Beekeeper Studio. The connection screen appears on startup.
+  </Step>
+  <Step title="Select PostgreSQL">
+    Choose **PostgreSQL** from the connection type dropdown.
+  </Step>
+  <Step title="Choose a connection mode">
+    Select **TCP** to connect via host and port (required for remote servers and SSL/SSH). Select **Socket** if PostgreSQL is running locally and you want to connect via a Unix socket.
+  </Step>
+  <Step title="Enter your credentials">
+    Fill in the **host**, **port**, **database**, **username**, and **password** fields.
+  </Step>
+  <Step title="Test and connect">
+    Click **Test Connection** to verify your settings, then click **Connect**.
+  </Step>
+</Steps>
+
+## Import a connection URL
+
+If you have a Postgres connection URL (for example from Heroku or a cloud provider), you can paste it directly into the URL import box at the top of the connection form. Beekeeper Studio will populate all the fields automatically.
+
+```text
+postgresql://username:password@host:5432/database
+```
+
+## SSL configuration
+
+Enable SSL if your PostgreSQL server requires encrypted connections. Beekeeper Studio supports three SSL modes:
+
+<AccordionGroup>
+  <Accordion title="Trust the server (default)">
+    Connect with SSL without providing any certificate files. Beekeeper Studio will not verify the server's certificate. This works for most managed PostgreSQL services.
+  </Accordion>
+  <Accordion title="Required cert (rejectUnauthorized = false)">
+    Provide your own CA certificate, client certificate, and client key files. The server's certificate is not verified — this is equivalent to `sslmode=verify-ca`.
+  </Accordion>
+  <Accordion title="Verified cert (rejectUnauthorized = true)">
+    Provide certificate files and enable full certificate verification. The server's hostname must match the certificate's CN or SANs. This is equivalent to `sslmode=verify-full`.
+  </Accordion>
+</AccordionGroup>
+
+<Tip>
+  Most managed PostgreSQL services (Amazon RDS, Google Cloud SQL, Azure Database for PostgreSQL) require SSL. "Trust the server" mode works for all of them without needing to download certificates.
+</Tip>
+
+## SSH tunneling
+
+If your PostgreSQL server is on a private network, you can connect through an SSH jump host. See the [SSH tunneling section in the connection overview](/connecting/overview#ssh-tunneling) for the full setup guide.
+
+## Connection string format
+
+Beekeeper Studio also accepts standard PostgreSQL connection strings in the URL import box:
+
+```text
+postgres://user:password@host:5432/dbname?sslmode=require
+```
+
+## Saving a connection
+
+After verifying your connection, enter a name in the **Connection Name** field. Check **Save Passwords** if you want Beekeeper Studio to store your password securely, then click **Save**. The connection will appear in the sidebar for future sessions.

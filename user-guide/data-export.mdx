@@ -1,0 +1,104 @@
+---
+title: "Exporting Data from Beekeeper Studio"
+description: "Export SQL query results or full tables from Beekeeper Studio to CSV, JSON, Excel, and SQL inserts. Configure delimiters, encoding, and headers for each format."
+---
+
+Beekeeper Studio gives you multiple ways to get data out of your database — from copying a single row to streaming millions of records from a large table directly to a file. This page covers all available export methods and formats so you can choose the right approach for your workflow.
+
+## Export methods overview
+
+<CardGroup cols={3}>
+  <Card title="Query result export" icon="download">
+    Run a SQL query and download the result set in your chosen format.
+  </Card>
+  <Card title="Table export" icon="table">
+    Export an entire table, multiple tables, or a filtered table view directly to a file.
+  </Card>
+  <Card title="Row copy" icon="clipboard">
+    Right-click any row in a table or query result to copy it in a variety of formats.
+  </Card>
+</CardGroup>
+
+## Exporting SQL query results
+
+After running a query in the [SQL Editor](/user-guide/sql-editor), click the **Download** button in the results toolbar to export what you see.
+
+You can choose to save to a file or copy the result directly to your clipboard.
+
+### Supported formats for query results
+
+| Format | Notes |
+|---|---|
+| CSV | Comma-separated values, compatible with most tools |
+| JSON | Standard JSON array of objects |
+| Excel (XLSX) | Native Excel format |
+| Markdown | Pipe-delimited table, useful for documentation |
+| Excel-friendly TSV | Tab-separated; pastes correctly into Excel and Google Sheets |
+
+### Result set limits
+
+By default, Beekeeper limits displayed query results to 20,000 records. This limit also applies to exports from the download button.
+
+<Tip>
+  To export a full result set beyond the 20,000 row limit, select **Download full results** from the download menu. Beekeeper fetches the complete result and streams it directly to a CSV or JSON file without loading it all into memory.
+</Tip>
+
+## Exporting a table or tables
+
+Table exports are streamed directly to disk, so they can handle tables with millions of rows without running out of memory.
+
+### How to start a table export
+
+There are three ways to begin:
+
+<Steps>
+  <Step title="From the Table View">
+    Open the table in Table View, click the **⚙** icon in the bottom-right, and choose **Export**.
+  </Step>
+  <Step title="From the sidebar">
+    Right-click any table in the sidebar and select **Export to File**.
+  </Step>
+  <Step title="From the app toolbar">
+    Go to **Tools → Export Data** to open the export modal directly.
+  </Step>
+</Steps>
+
+In the export modal you can set the output file location, choose a format, and configure advanced options such as pretty-printing JSON exports.
+
+<Note>
+  Exporting a large table can take a significant amount of time. A progress notification appears in the bottom-right corner of the app while the export runs.
+</Note>
+
+### Table export formats
+
+| Format | Notes |
+|---|---|
+| CSV | One row per line, suitable for spreadsheets and data pipelines |
+| JSON | Full JSON array |
+| Newline-delimited JSON (JSONL) | One JSON object per line; useful for streaming and log ingestion |
+| SQL (INSERT) | Generates `INSERT` statements; useful for migrating data between databases |
+
+### Multi-table export
+
+To export several tables at once, select **Export multiple tables** in the export modal, or go to **Tools → Export**.
+
+All tables in the database are listed and grouped by schema (for databases that support schemas). You can:
+
+- Select all tables in a schema with a single click
+- Pick and choose individual tables
+- Export each table to a separate file named `tablename.{csv,json,sql}`
+
+## Copying individual rows
+
+For quick one-off copies, right-click any cell in a table view or query result and choose to copy the row in one of the following formats:
+
+| Format | Use case |
+|---|---|
+| Excel-friendly TSV | Paste directly into Excel or Google Sheets with correct column parsing |
+| JSON | Copy a row as a JSON object |
+| Markdown | Include a row in documentation or a GitHub comment |
+| SQL Insert | Generate a ready-to-run `INSERT` statement for the row |
+
+<Tip>
+  The Excel-friendly TSV format is specifically designed so your spreadsheet application automatically distributes values across columns when you paste — no extra parsing steps needed.
+</Tip>

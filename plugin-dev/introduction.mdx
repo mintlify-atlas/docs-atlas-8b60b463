@@ -1,0 +1,85 @@
+---
+title: "Beekeeper Studio Plugin System Overview"
+description: "Learn how Beekeeper Studio's iframe-based plugin system works, from discovery and installation to sandboxed execution and message-passing communication."
+---
+
+The Beekeeper Studio Plugin System lets you extend the application's functionality through custom web-based user interfaces. Plugins are standard web apps — HTML, CSS, and JavaScript — that run inside the application and can read from and write to your connected database, enabling custom data analysis tools, specialized workflows, and advanced features tailored to your needs.
+
+<Warning>
+  The plugin system is in beta and available in Beekeeper Studio 5.3+. The API may change between versions. We'd love your feedback!
+</Warning>
+
+## What plugins can do
+
+Plugins integrate directly into Beekeeper Studio's workspace as tabs or panels. They can query your database, display custom visualizations, automate workflows, and interact with the application's UI — all without requiring changes to Beekeeper Studio itself.
+
+<CardGroup cols={2}>
+  <Card title="Database access" icon="database">
+    Read table schemas, execute queries, and inspect foreign keys, indexes, and primary keys from the connected database.
+  </Card>
+  <Card title="Custom views" icon="layout-panel-top">
+    Render fully custom HTML/CSS/JS interfaces inside tab views, with access to application theme variables.
+  </Card>
+  <Card title="Data interaction" icon="table">
+    Display query results in the built-in result table, open new query or table tabs, and respond to context menu actions on cells, rows, and columns.
+  </Card>
+  <Card title="Persistent storage" icon="hard-drive">
+    Store and retrieve plugin state, plaintext data, and encrypted secrets that survive application restarts.
+  </Card>
+</CardGroup>
+
+## How plugins work
+
+### Plugin discovery
+
+Beekeeper Studio fetches a plugin index from the central plugin registry:
+
+```
+https://raw.githubusercontent.com/beekeeper-studio/beekeeper-studio-plugins/main/plugins.json
+```
+
+Each entry in the registry points to a plugin manifest, which describes the plugin's metadata and where to download its assets.
+
+### Installation
+
+When you install a plugin, Beekeeper Studio:
+
+1. Downloads the plugin's `manifest.json`.
+2. Downloads the plugin's `.zip` file containing the bundled HTML/CSS/JS assets.
+3. Unpacks the archive into the local plugin directory for your platform:
+
+| Platform | Plugin directory |
+|----------|-----------------|
+| Linux | `~/.config/beekeeper-studio/plugins/` |
+| macOS | `~/Library/Application Support/beekeeper-studio/plugins/` |
+| Windows | `%APPDATA%\beekeeper-studio\plugins\` |
+| Windows (Portable) | `{beekeeper-studio-directory}\beekeeper-studio-data\plugins\` |
+
+### Sandboxed execution
+
+Each plugin runs inside an `<iframe>` with `sandbox` attributes, which limits access to the host environment unless explicitly permitted through the plugin API. The iframe is served using a custom Electron protocol — `plugin://` — which is defined specifically for Beekeeper Studio and is only accessible within the application. This isolates plugins from external web content and from each other.
+
+### Message-passing communication
+
+Plugins communicate with Beekeeper Studio using the browser's `postMessage` API. The `@beekeeperstudio/plugin` npm package wraps this communication layer and exposes convenient functions like `getTables()` and `runQuery()`.
+
+The system supports two kinds of messages:
+
+<CardGroup cols={2}>
+  <Card title="Requests" icon="arrow-right-arrow-left">
+    A request expects a response. For example, calling `getTables()` sends a request and returns a list of tables from the connected database.
+  </Card>
+  <Card title="Notifications" icon="bell">
+    A notification sends data without expecting a reply. For example, when the application theme changes, Beekeeper Studio sends a `themeChanged` notification to all active plugin views.
+  </Card>
+</CardGroup>
+
+### UI integration
+
+Plugins declare their views in `manifest.json`. Beekeeper Studio reads these declarations and renders the corresponding `<iframe>` in the appropriate location — a new workspace tab, a context menu entry, or a sidebar panel.
+
+## Next steps
+
+<Card title="Create your first plugin" icon="rocket" href="/plugin-dev/getting-started">
+  Follow the step-by-step guide to build and run a Hello World plugin in under 10 minutes.
+</Card>

@@ -1,0 +1,107 @@
+---
+title: "Importing Data into Beekeeper Studio (CSV, JSON, Excel)"
+description: "Import CSV, JSON, JSON Lines, and Excel files into existing tables or create new tables from file data using Beekeeper Studio's import wizard."
+---
+
+Beekeeper Studio's import wizard makes it straightforward to load external data files into your database. You can import into an existing table or create a brand-new table directly from the file, with full control over column mapping, null handling, and upsert behavior. Importing data requires a paid Beekeeper Studio license.
+
+## Supported import formats
+
+<CardGroup cols={2}>
+  <Card title="CSV" icon="file-csv">
+    Comma-separated values. Beekeeper auto-detects the separator and lets you override it.
+  </Card>
+  <Card title="JSON" icon="brackets-curly">
+    A JSON array of objects where each object becomes a row.
+  </Card>
+  <Card title="JSON Lines (JSONL)" icon="file-lines">
+    One JSON object per line — common in log exports and data pipelines.
+  </Card>
+  <Card title="Excel (XLSX)" icon="file-spreadsheet">
+    Native Excel format. Beekeeper reads the first sheet by default.
+  </Card>
+</CardGroup>
+
+## Starting an import
+
+There are three entry points, each with different defaults:
+
+| Entry point | Default behavior |
+|---|---|
+| Right-click a table → **Import From File** | Imports into the selected table |
+| Table View **⛭** icon → **Import From File** | Imports into the currently open table |
+| Create Table dropdown → **New Table From File** | Creates a new table from the file |
+
+## Step 1: Select or create a table
+
+If you started from **Import From File**, the target table is pre-selected. You can search for a different table using the filter, or browse the list.
+
+If you want to create a new table instead, flip the **Create Table** toggle. You can only follow one path per import — importing into an existing table or creating a new one.
+
+## Step 2: Select your file and configure options
+
+Choose the file you want to import. On this screen you can also:
+
+- **Trim whitespace** — strip leading and trailing spaces from each cell value
+- **Override separator** — Beekeeper auto-detects delimiters but you can specify one manually
+- **Define NULL values** — specify which strings in the file (e.g. `NULL`, `N/A`, `""`) should be treated as SQL `NULL`
+- **Preview** — inspect the first 10 rows with your current settings applied before proceeding
+
+Click **Map To Table** when you are ready to continue.
+
+## Step 3: Map columns
+
+### Importing into a new table
+
+<Steps>
+  <Step title="Choose a schema">
+    If your database supports schemas, select the target schema (defaults to the database's default schema).
+  </Step>
+  <Step title="Name the table">
+    Defaults to the filename without its extension.
+  </Step>
+  <Step title="Review column names and types">
+    Column names are generated from the file headers (spaces replaced with underscores). Types are inferred from the first five rows — common types like integers, varchar, booleans, and dates are detected automatically.
+  </Step>
+  <Step title="Set the primary key">
+    The first column is selected as the primary key by default. You can change this before proceeding.
+  </Step>
+</Steps>
+
+### Importing into an existing table
+
+<Steps>
+  <Step title="Choose an import mode">
+    Select **Append** to add rows to existing data, or **Truncate and replace** to clear the table first.
+  </Step>
+  <Step title="Configure upsert (optional)">
+    Enable upsert to update existing rows when a matching primary key is found, and insert new rows otherwise.
+  </Step>
+  <Step title="Map file columns to table columns">
+    Beekeeper auto-suggests mappings using case-insensitive, alphanumeric name matching. For example, a file column named `Organization ID` maps automatically to a table column named `organization_id`.
+
+    Mark any column as **(IGNORE)** to skip it during import. Click the **X** icon or select **IGNORE** from the column dropdown to unmap it.
+  </Step>
+</Steps>
+
+<Warning>
+  Beekeeper does not perform automatic type checking when importing into an existing table. Double-check your column mappings to ensure file data is compatible with the target column types. Table columns marked `NOT NULL` with no default value **must** be mapped.
+</Warning>
+
+## Step 4: Review and run the import
+
+You see a 10-row preview of what will be imported with your current mapping. If everything looks correct, click **Run the Import**.
+
+- Large imports (e.g., 100,000 rows) typically take 30–40 seconds
+- New tables are created before data is inserted
+- After a successful import, you can close the window or click through to view your imported data
+
+### Error handling
+
+All imports run inside a database transaction. If any error occurs:
+
+- The transaction is rolled back automatically
+- Your existing table data is left unchanged
+- If you were creating a new table, it is removed
+
+Beekeeper displays the database error message, which you can copy for troubleshooting.

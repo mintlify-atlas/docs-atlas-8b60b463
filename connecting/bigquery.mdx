@@ -1,0 +1,73 @@
+---
+title: "Connect to Google BigQuery in Beekeeper Studio"
+description: "Authenticate with a service account JSON key to connect Beekeeper Studio to Google BigQuery. Requires BigQuery User IAM role or higher."
+---
+
+Connecting to Google BigQuery requires a Google Cloud IAM user or service account with the appropriate permissions, plus a downloaded JSON private key file. Beekeeper Studio uses this key file as the only supported authentication method.
+
+<Note>
+  Google BigQuery is available in both the free **Community** edition and paid **Ultimate** editions of Beekeeper Studio.
+</Note>
+
+## Minimum required IAM role
+
+Your IAM user or service account needs at least the **BigQuery User** role, which is equivalent to the combination of **BigQuery Data Viewer** and **BigQuery Job User**.
+
+The BigQuery User role provides access to most Beekeeper Studio features. For full access to schema editing and data modification, your administrator should grant **BigQuery Admin**.
+
+<Tip>
+  Your Google Cloud administrator can configure more fine-grained permissions if BigQuery Admin is too permissive for your use case.
+</Tip>
+
+## Set up a service account
+
+<Steps>
+  <Step title="Open Google Cloud IAM">
+    In the Google Cloud Console, navigate to **IAM & Admin** → **Service Accounts**.
+  </Step>
+  <Step title="Create or select a service account">
+    Create a new service account or select an existing one. Assign it the **BigQuery User** role (or higher).
+  </Step>
+  <Step title="Download the JSON key file">
+    Open the service account, go to the **Keys** tab, click **Add Key** → **Create new key**, and choose **JSON**. Save the downloaded file somewhere accessible on your machine.
+  </Step>
+</Steps>
+
+## Connect from Beekeeper Studio
+
+<Steps>
+  <Step title="Open the connection screen">
+    Launch Beekeeper Studio and open the connection screen.
+  </Step>
+  <Step title="Select Google BigQuery">
+    Choose **Google BigQuery** from the connection type dropdown.
+  </Step>
+  <Step title="Enter your Google Cloud Project ID">
+    Paste the Project ID from your Google Cloud Console into the **Project ID** field.
+  </Step>
+  <Step title="Enter a default dataset">
+    Enter the name of the BigQuery dataset you want to connect to by default.
+  </Step>
+  <Step title="Select your JSON key file">
+    Click the file picker next to **Key File** and select the JSON private key file you downloaded.
+  </Step>
+  <Step title="Connect">
+    Click **Connect** to establish the connection.
+  </Step>
+</Steps>
+
+## Use region-specific datasets
+
+<Warning>
+  When creating a dataset in BigQuery, always explicitly specify a region — do not use the **Multi-Region** option.
+</Warning>
+
+Many common operations fail silently with Multi-Region datasets, both in Beekeeper Studio and in the Google Cloud Console. Affected operations include:
+
+- Uploading a CSV
+- Viewing table structure
+- Importing data
+- Linking data from a Cloud Storage bucket
+- Copying data from Amazon S3
+
+To avoid these issues, choose a specific region (for example, `us-central1` or `europe-west2`) when you create or modify your BigQuery dataset.

@@ -1,0 +1,247 @@
+---
+title: "Troubleshooting Common Beekeeper Studio Problems and Errors"
+description: "Fix startup failures, database connection errors, SQLite permission issues, MySQL syntax problems, and Wayland display glitches in Beekeeper Studio."
+---
+
+Most issues with Beekeeper Studio have straightforward fixes. Work through the relevant section below, and if you're still stuck, the community and support team are happy to help. Before filing a bug report, it helps to collect logs and — if possible — a screen recording of the problem.
+
+## Collecting debug information
+
+### Check the developer console for errors
+
+Click **Help → Show Developer Tools**, then open the **Console** tab. Change the levels dropdown to **Errors** only. Screenshot any errors you find and attach them to your bug report.
+
+### Find log files
+
+Beekeeper Studio writes logs to these locations by default. By default, logs contain only uncaught errors. You can enable verbose logging by starting the app with the `DEBUG=*` environment variable.
+
+<Tabs>
+  <Tab title="Linux">
+    ```
+    ~/.config/beekeeper-studio/logs/{process type}.log
+    ```
+    To enable debug logging:
+    ```bash
+    DEBUG=* beekeeper-studio
+    ```
+  </Tab>
+  <Tab title="macOS">
+    ```
+    ~/Library/Logs/beekeeper-studio/{process type}.log
+    ```
+  </Tab>
+  <Tab title="Windows">
+    ```
+    %USERPROFILE%\AppData\Roaming\beekeeper-studio\logs\{process type}.log
+    ```
+  </Tab>
+</Tabs>
+
+### Screen recording tools
+
+Screen recordings are especially helpful for issues that are hard to reproduce.
+
+- **macOS**: [Kap](https://getkap.co/) — open source, exports GIF or video
+- **Linux**: [Peek](https://github.com/phw/peek) — open source, exports GIF or MKV
+- **Windows**: [Captura](https://github.com/MathewSachin/Captura) — open source
+
+Paste the recording directly into your GitHub issue and GitHub handles the rest.
+
+## MySQL and MariaDB
+
+<AccordionGroup>
+  <Accordion title="SQL syntax error when creating a stored procedure">
+    The MySQL command-line client uses `DELIMITER` to allow multi-statement input, but the MySQL server itself does not support this syntax. Running a procedure definition with `DELIMITER` through Beekeeper Studio results in a `You have an error in your SQL syntax` error.
+
+    Remove the `DELIMITER` statements from your query. Change this:
+
+    ```sql
+    DELIMITER //
+
+    CREATE PROCEDURE simpleproc (OUT param1 INT)
+     BEGIN
+      SELECT COUNT(*) INTO param1 FROM t;
+     END;
+    //
+
+    DELIMITER ;
+    ```
+
+    To this:
+
+    ```sql
+    CREATE PROCEDURE simpleproc (OUT param1 INT)
+     BEGIN
+      SELECT COUNT(*) INTO param1 FROM t;
+     END;
+    ```
+  </Accordion>
+  <Accordion title="'Access denied for user' error when connecting">
+    If you see `Access denied for user 'xxx' (using password: YES)`, try enabling **Enable SSL** in the connection settings. Some MySQL servers — including Google Cloud SQL — require SSL for certain user accounts.
+  </Accordion>
+  <Accordion title="Can't create a descending index">
+    MySQL versions before 8.0 do not support `DESC` indexes despite accepting the syntax. If you create a `DESC` index in Beekeeper Studio against a pre-8.0 MySQL server, MySQL silently creates an `ASC` index instead. Upgrade to MySQL 8.0+ to use true descending indexes.
+  </Accordion>
+</AccordionGroup>
+
+## SQLite
+
+<AccordionGroup>
+  <Accordion title="'No such column' error when the column exists">
+    SQLite treats double-quoted identifiers as column or table names, not strings. If you used double quotes around a string value in your query, SQLite interprets it as a column reference.
+
+    - Double quotes are for **identifiers** (tables, columns, functions)
+    - Single quotes are for **string literals**
+
+    Change this:
+
+    ```sql
+    -- This won't work
+    SELECT "string" AS my_column FROM foo;
+    ```
+
+    To this:
+
+    ```sql
+    -- This works
+    SELECT 'string' AS my_column FROM foo;
+    ```
+  </Accordion>
+  <Accordion title="'Permission denied' or 'unable to open database file'">
+    This error almost always occurs when Beekeeper Studio is installed as a Snap or Flatpak, which sandboxes file access.
+
+    **Flatpak users** — grant host filesystem access:
+    ```bash
+    sudo flatpak override io.beekeeperstudio.Studio --filesystem=host
+    ```
+
+    **Snap users** — if the database is on an external or removable drive, connect the removable-media plug:
+    ```bash
+    sudo snap connect beekeeper-studio:removable-media :removable-media
+    ```
+
+    If neither fix applies to your situation, [open a bug report](https://github.com/beekeeper-studio/beekeeper-studio/issues/new?template=bug_report.md&title=BUG:) with details about your setup.
+  </Accordion>
+</AccordionGroup>
+
+## PostgreSQL
+
+<AccordionGroup>
+  <Accordion title="'Column does not exist' error when the column clearly does">
+    PostgreSQL is case-sensitive about column names in a specific way:
+
+    - Columns defined **without** double quotes are stored in lowercase.
+    - Columns defined **with** double quotes preserve their case, and you must always use double quotes when querying them.
+
+    For example, given this table:
+    ```sql
+    CREATE TABLE foo ("myColumn" int);
+    ```
+
+    - This **won't work**: `SELECT myColumn FROM foo`
+    - This **works**: `SELECT "myColumn" FROM foo`
+
+    Beekeeper Studio 9.3+ is officially supported. Older versions may mostly work but are not guaranteed.
+  </Accordion>
+</AccordionGroup>
+
+## Cloud databases (Google Cloud SQL, Amazon RDS)
+
+<AccordionGroup>
+  <Accordion title="Connections drop after IP allowlist expires">
+    If you use a time-limited IP allowlist (for example, `gcloud sql connect` allowlists your IP for 5 minutes), queries may fail once the allowlist window closes. Beekeeper Studio maintains a connection pool that keeps idle connections alive for 20 seconds by default. When those connections are recycled and your IP is no longer allowlisted, new connections are rejected.
+
+    To extend the idle timeout, add this to your [user configuration file](/user-guide/configuration):
+
+    ```ini
+    ; Keep idle connections alive for 5 minutes to match your allowlist window
+    [db.postgres]
+    idleTimeout = 300000
+
+    [db.mysql]
+    idleTimeout = 300000
+    ```
+
+    For a permanent fix, consider using an [SSH tunnel](/connecting/overview#ssh) instead of IP allowlisting.
+  </Accordion>
+</AccordionGroup>
+
+## Linux — Wayland
+
+<AccordionGroup>
+  <Accordion title="Wrong colors (incorrect saturation, contrast, or readability)">
+    Colors appearing wrong on Wayland — for example, oranges looking yellow, greys appearing almost black, or text being hard to read — is caused by a Chromium/Electron bug with the Wayland color management protocol.
+
+    Add the following flag to `~/.config/bks-flags.conf`:
+
+    ```bash
+    echo "--disable-features=WaylandWpColorManagerV1" >> ~/.config/bks-flags.conf
+    ```
+
+    Then restart Beekeeper Studio.
+  </Accordion>
+</AccordionGroup>
+
+## Linux — Snap
+
+<AccordionGroup>
+  <Accordion title="File picker shows rectangles instead of fonts">
+    This is a known `snapd` issue where snap-packaged apps lose access to system font configuration. It occurs most often on Arch, Manjaro, and Fedora.
+
+    Clear the fontconfig cache:
+
+    ```bash
+    sudo rm -f /var/cache/fontconfig/*
+    rm -f ~/.cache/fontconfig
+    ```
+
+    Then restart Beekeeper Studio.
+  </Accordion>
+</AccordionGroup>
+
+## Linux — OpenSSL error when building from source
+
+<AccordionGroup>
+  <Accordion title="'digital envelope routines: initialization error'">
+    If you see `error:03000086:digital envelope routines::initialization error` when running or building Beekeeper Studio from source, you need to update OpenSSL.
+
+    **Ubuntu / Debian:**
+    ```bash
+    sudo apt-get update
+    sudo apt-get upgrade openssl
+    ```
+
+    **CentOS / RHEL:**
+    ```bash
+    sudo yum update openssl
+    ```
+
+    **macOS (Homebrew):**
+    ```bash
+    brew update
+    brew upgrade openssl
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Windows
+
+<AccordionGroup>
+  <Accordion title="The app is stuck running in the background and won't start">
+    If you've just installed Beekeeper Studio on Windows and the app won't launch (while Task Manager shows it running), you may be missing the MSVC Redistributables required by a native dependency.
+
+    Install the [MSVC Redistributables](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170) for your architecture, then try launching the app again.
+  </Accordion>
+</AccordionGroup>
+
+## Reporting a bug
+
+If none of the above resolves your issue:
+
+- [File an issue on GitHub](https://github.com/beekeeper-studio/beekeeper-studio/issues/new/choose) — include your OS, app version, logs, and a screen recording if possible.
+- [Start a GitHub discussion](https://github.com/beekeeper-studio/beekeeper-studio/discussions/new) — good for general questions or uncertain problems.
+- [Email support](mailto:support@beekeeperstudio.io) — available to Ultimate edition subscribers.
+
+<Note>
+  Don't be shy about filing an issue even if you're not sure the behavior is a bug. The community is welcoming and the team reviews every report.
+</Note>

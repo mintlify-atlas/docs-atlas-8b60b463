@@ -1,0 +1,74 @@
+---
+title: "Saving and Organizing SQL Queries in Beekeeper"
+description: "Save, name, organize, and reopen SQL queries in Beekeeper Studio using the Saved Queries panel, including how to import existing .sql files."
+---
+
+Beekeeper Studio's Saved Queries feature lets you preserve any SQL query for future use, so you never have to rewrite a frequently-used statement from scratch. Saved queries are stored locally in a SQLite database in your Beekeeper configuration directory, keeping them available across sessions and connections.
+
+## Saving a query
+
+While working in the SQL editor, save your current query in either of these ways:
+
+- Press `Ctrl+S` (Windows/Linux) or `Cmd+S` (macOS)
+- Click the **Save** button in the bottom-right corner of the SQL editor
+
+A prompt appears asking you to name the query. You can rename it later at any time.
+
+```sql
+-- Example: a query worth saving
+SELECT
+  u.id,
+  u.email,
+  COUNT(o.id) AS order_count,
+  SUM(o.total) AS lifetime_value
+FROM users u
+LEFT JOIN orders o ON o.user_id = u.id
+GROUP BY u.id, u.email
+ORDER BY lifetime_value DESC;
+```
+
+## Accessing saved queries
+
+<Steps>
+  <Step title="Open the Saved Queries panel">
+    Click the **Saved Queries** icon in the left sidebar to open the panel. All your saved queries are listed here.
+  </Step>
+  <Step title="Open a query">
+    Double-click any saved query to open it in a new SQL editor tab, ready to run or edit.
+  </Step>
+</Steps>
+
+## Importing .sql files
+
+If you have existing `.sql` files you want to bring into Beekeeper's Saved Queries, you can import them:
+
+<Tabs>
+  <Tab title="From the Saved Queries panel">
+    Click the **Import** button in the Saved Queries panel, then choose **Import .sql files**.
+  </Tab>
+  <Tab title="From the File menu">
+    Go to **File → Import SQL Files** and select one or more files.
+  </Tab>
+</Tabs>
+
+Beekeeper accepts multiple `.sql` files (or any plain-text file) in a single import. Each file is copied into your Saved Queries — changes to the original file on disk are not synchronized after import.
+
+<Note>
+  Importing creates a copy of your file inside Beekeeper's local storage. If you update the original `.sql` file later, you will need to re-import it to see the changes.
+</Note>
+
+## Where queries are stored
+
+Saved queries are persisted to a SQLite database in your local Beekeeper configuration directory. See the [Data Storage Location](/support/data-location) page for the exact path on your operating system.
+
+<AccordionGroup>
+  <Accordion title="Windows">
+    `%APPDATA%\beekeeper-studio\`
+  </Accordion>
+  <Accordion title="Linux">
+    `~/.config/beekeeper-studio/`
+  </Accordion>
+  <Accordion title="macOS">
+    `~/Library/Application Support/beekeeper-studio/`
+  </Accordion>
+</AccordionGroup>

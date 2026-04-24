@@ -1,0 +1,148 @@
+---
+title: "Azure Entra ID Authentication in Beekeeper Studio"
+description: "Connect to Azure-hosted MySQL, PostgreSQL, and SQL Server using browser SSO, Azure CLI session, or Service Principal authentication via Microsoft Entra ID."
+---
+
+Beekeeper Studio supports Microsoft Entra ID (formerly Azure Active Directory) authentication for databases hosted in Azure. This lets you sign in with your organizational identity instead of a static database password, using one of three methods: browser-based SSO, Azure CLI, or Service Principal.
+
+## Authentication methods
+
+<CardGroup cols={3}>
+  <Card title="Browser SSO" icon="globe" href="#browser-based-sso">
+    Sign in with your Microsoft account via a browser. Easiest to set up. Supported for **MS SQL Server**.
+  </Card>
+  <Card title="Azure CLI" icon="terminal" href="#azure-cli-authentication">
+    Use a pre-authenticated `az login` session. Most enterprise-friendly. Supported for **MySQL, PostgreSQL, and MS SQL Server**.
+  </Card>
+  <Card title="Service Principal" icon="key" href="#service-principal-authentication">
+    Authenticate with a client ID and secret for non-interactive use. Supported for **MS SQL Server**.
+  </Card>
+</CardGroup>
+
+<Tip>
+  Use Azure CLI authentication whenever possible — it's the most secure workflow because it doesn't require the Beekeeper Studio web server and works with your existing enterprise login process.
+</Tip>
+
+## Browser-based SSO
+
+Browser SSO uses your Microsoft Entra ID credentials through a browser popup. It is the easiest method to use but routes a temporary token through the Beekeeper Studio web server.
+
+<Note>
+  Browser SSO is supported for **MS SQL Server** only.
+</Note>
+
+<Warning>
+  Signing in this way routes authentication through the Beekeeper Studio web server, which temporarily stores a token for the app to retrieve. No credentials are permanently stored by the web server.
+</Warning>
+
+<Steps>
+  <Step title="Select your database">
+    On the connection screen, choose your database type (MS SQL Server).
+  </Step>
+  <Step title="Select Azure AD SSO as the authentication method">
+    In the **Authentication Method** dropdown, select **Azure AD SSO**.
+  </Step>
+  <Step title="Enter connection details">
+    Provide the **Server** hostname and **Database** name.
+  </Step>
+  <Step title="Click Connect">
+    Click **Connect**. Your browser will open and prompt you to sign in with your Microsoft account.
+  </Step>
+  <Step title="Complete authentication">
+    After signing in, your browser will prompt you to switch back to Beekeeper Studio. The connection completes automatically.
+  </Step>
+</Steps>
+
+## Azure CLI authentication
+
+Azure CLI authentication uses your active `az login` session to retrieve a temporary database access token. This is the recommended method for enterprise environments.
+
+<Note>
+  Azure CLI authentication is supported for **MySQL, PostgreSQL, and MS SQL Server**.
+</Note>
+
+<Steps>
+  <Step title="Install the Azure CLI">
+    If you haven't already, [install the Azure CLI from Microsoft](https://learn.microsoft.com/en-us/cli/azure/?view=azure-cli-latest).
+  </Step>
+  <Step title="Sign in with az login">
+    Open your terminal and run:
+
+    ```bash
+    az login
+    ```
+
+    Follow the prompts to authenticate. If your organization uses a specific tenant, use:
+
+    ```bash
+    az login --tenant your-tenant-id
+    ```
+  </Step>
+  <Step title="Select Azure CLI Authentication in Beekeeper Studio">
+    On the connection screen, choose your database type, then select **Azure CLI Authentication** from the **Authentication Method** dropdown.
+  </Step>
+  <Step title="Enter connection details">
+    Provide:
+    - **Server** — your Azure database server hostname
+    - **Database** — the database name
+    - **Username** — your database username
+
+    No password is required.
+  </Step>
+  <Step title="Click Connect">
+    Click **Connect**. Beekeeper Studio requests a temporary access token from the Azure CLI. This takes a few seconds.
+  </Step>
+</Steps>
+
+## Service Principal authentication
+
+Service Principal authentication is designed for automated services and non-interactive applications. Use it only when browser SSO and Azure CLI are not available options.
+
+<Note>
+  Service Principal authentication is supported for **MS SQL Server** only.
+</Note>
+
+<Warning>
+  Beekeeper Studio **will** store your Client ID and Client Secret locally when you use this authentication method.
+</Warning>
+
+<Steps>
+  <Step title="Create a Service Principal">
+    Follow the [Azure documentation to create a Service Principal](https://learn.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal) in your Azure tenant.
+  </Step>
+  <Step title="Grant database access">
+    Grant the Service Principal the necessary permissions on your target database.
+  </Step>
+  <Step title="Select Service Principal in Beekeeper Studio">
+    On the connection screen, choose your database type, then select **Service Principal** from the **Authentication Method** dropdown.
+  </Step>
+  <Step title="Enter credentials">
+    Provide:
+    - **Server** — your Azure database server hostname
+    - **Database** — the database name
+    - **Tenant ID** — your Azure tenant ID
+    - **Client ID** — the Service Principal's application (client) ID
+    - **Client Secret** — the Service Principal's client secret
+  </Step>
+  <Step title="Click Connect">
+    Click **Connect**.
+  </Step>
+</Steps>
+
+## Troubleshooting
+
+### Login failed for user
+
+**Error:** `Login failed for user '<user>@<tenant>.onmicrosoft.com'`
+
+**Cause:** The Entra ID-authenticated user is not mapped to a SQL database user.
+
+**Solution:** Create a SQL user that maps to the Entra ID identity and grant it the necessary roles:
+
+```sql
+CREATE USER [user@tenant.onmicrosoft.com] FROM EXTERNAL PROVIDER;
+ALTER ROLE db_datareader ADD MEMBER [user@tenant.onmicrosoft.com];
+ALTER ROLE db_datawriter ADD MEMBER [user@tenant.onmicrosoft.com];
+```
+
+Replace `user@tenant.onmicrosoft.com` with your actual Entra ID user principal name. See the [Microsoft Q&A article](https://learn.microsoft.com/en-us/answers/questions/133709/login-failed-for-user) for additional context.

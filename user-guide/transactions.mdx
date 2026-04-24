@@ -1,0 +1,106 @@
+---
+title: "Manual Transaction Management in Beekeeper Studio"
+description: "Use Beekeeper Studio's Manual Transaction Mode to control BEGIN, COMMIT, and ROLLBACK explicitly, with automatic timeout protection against uncommitted changes."
+---
+
+Beekeeper Studio's Manual Transaction Mode gives you explicit control over when database changes are committed. Instead of auto-committing after each statement, every query you run is wrapped in a transaction that you must commit or roll back yourself. This is useful when you need to preview changes before making them permanent, batch several writes into a single atomic operation, or work carefully with sensitive production data.
+
+## Enabling manual transaction mode
+
+Find the **Auto/Manual Commit** toggle in the bottom-left corner of the SQL editor and switch it to **Manual**.
+
+<Note>
+  Manual Transaction Mode is available for PostgreSQL, CockroachDB, Redshift, MySQL, MariaDB, SQL Server, Firebird, and Oracle. It is not supported for SQLite or other database types.
+</Note>
+
+## The transaction lifecycle
+
+<Steps>
+  <Step title="Begin a transaction">
+    Click the **Begin** button in the bottom-left of the editor, or simply run a query. If you run a query without explicitly beginning a transaction, Beekeeper automatically prepends a `BEGIN` statement.
+
+    ```sql
+    BEGIN;
+    ```
+  </Step>
+  <Step title="Run your queries">
+    Execute any number of statements. Changes are staged in the database but not yet visible to other connections.
+
+    ```sql
+    UPDATE accounts SET balance = balance - 500 WHERE id = 1;
+    UPDATE accounts SET balance = balance + 500 WHERE id = 2;
+    ```
+  </Step>
+  <Step title="Commit or roll back">
+    When you are satisfied with the results, click **Commit** to make the changes permanent. If something looks wrong, click **Rollback** to discard everything since the `BEGIN`.
+
+    ```sql
+    -- Make changes permanent
+    COMMIT;
+
+    -- Or discard all changes
+    ROLLBACK;
+    ```
+  </Step>
+</Steps>
+
+## Connection reservation
+
+When a transaction is active, Beekeeper reserves a dedicated database connection for that editor tab. This ensures no context is lost between queries — your temporary tables, session variables, and uncommitted data remain visible to subsequent statements in the same tab.
+
+<Warning>
+  Uncommitted transactions hold locks on the rows and tables they have modified. Long-running transactions can block other users or processes from accessing that data. Always commit or roll back as soon as you are done.
+</Warning>
+
+## Transaction timeout
+
+To protect against forgotten open transactions, Beekeeper applies an automatic timeout:
+
+| Default | Behavior |
+|---|---|
+| 9 minutes of inactivity | You receive a warning that the transaction is still open |
+| 10 minutes of inactivity | The transaction is automatically rolled back |
+
+When the warning appears, you can finish the transaction or extend it for another 10 minutes.
+
+## Configuration
+
+You can customize timeout values and connection limits in the [Beekeeper config file](/user-guide/configuration):
+
+```ini
+[db.default]
+; Maximum number of concurrent manual transactions across all tabs
+; Keep this below the database connection pool size
+maxReservedConnections = 2
+
+; How long (ms) to keep a transaction open without activity before rolling back
+manualTransactionTimeout = 600000   ; 10 minutes
+
+; How long (ms) before rollback to warn the user
+autoRollbackWarningWindow = 60000   ; 1 minute
+
+[db.postgres]
+; Override for PostgreSQL only — allow more concurrent transactions
+maxReservedConnections = 4
+```
+
+<Tip>
+  Keep `maxReservedConnections` below your database's maximum connection pool size. Reserved connections are pulled from that pool, and exhausting it will prevent other parts of the application from connecting.
+</Tip>
+
+## When to use manual transactions
+
+<CardGroup cols={2}>
+  <Card title="Batch data changes" icon="layer-group">
+    Group multiple `INSERT`, `UPDATE`, or `DELETE` statements into one atomic operation so they all succeed or all fail together.
+  </Card>
+  <Card title="Preview before committing" icon="eye">
+    Run `UPDATE` or `DELETE` statements and verify the affected rows before deciding whether to commit or roll back.
+  </Card>
+  <Card title="Sensitive production edits" icon="shield">
+    Make careful changes to production data with the safety net of being able to roll back if anything looks wrong.
+  </Card>
+  <Card title="Dependent operations" icon="arrow-right-arrow-left">
+    Execute a sequence of statements where each step depends on the previous one, and roll everything back cleanly if any step fails.
+  </Card>
+</CardGroup>

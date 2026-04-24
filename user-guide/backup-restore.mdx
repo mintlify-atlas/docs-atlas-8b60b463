@@ -1,0 +1,59 @@
+---
+title: "Database Backup and Restore in Beekeeper Studio"
+description: "Back up and restore PostgreSQL, MySQL, MariaDB, and SQLite databases from inside Beekeeper Studio using native database tools like pg_dump and mysqldump."
+---
+
+Beekeeper Studio provides a guided interface for running native database backup and restore tools without having to remember command-line flags. You configure the options in the UI and Beekeeper generates and executes the correct command — or hands it back to you to run in your own terminal.
+
+## Supported databases and tools
+
+| Database | Backup tool | Restore tool |
+|---|---|---|
+| PostgreSQL | `pg_dump` | `pg_restore` |
+| MySQL / MariaDB | `mysqldump` | `mysql` |
+| SQLite | `sqlite3` | `sqlite3` |
+
+<Note>
+  The native backup tool must be installed and accessible on your `PATH` for Beekeeper to run it. For example, `pg_dump` must be installed locally even when connecting to a remote PostgreSQL server.
+</Note>
+
+## Opening backup and restore
+
+Go to **Tools** in the app menu and select either **Backup** or **Restore**.
+
+## Backup workflow
+
+<Steps>
+  <Step title="Choose entities">
+    Select which tables, schemas, or objects you want to include in the backup. Leaving everything deselected produces a full database backup.
+  </Step>
+  <Step title="Configure the backup">
+    Choose from commonly used backup options — output format, compression, schema-only or data-only exports, and more — using checkboxes and dropdowns.
+
+    If you need a flag that isn't exposed in the UI, use the **Custom Arguments** field to append any additional command-line options directly.
+  </Step>
+  <Step title="Review and execute">
+    Beekeeper shows you the exact command it will run (with sensitive values like passwords replaced by environment variables). You can:
+    - Click **Run** to let Beekeeper execute the command in-app
+    - Click **Copy to Clipboard** to run the command yourself in a terminal
+  </Step>
+</Steps>
+
+## Restore workflow
+
+<Steps>
+  <Step title="Configure the restore">
+    Point Beekeeper at your backup file and set any restore options, such as target database, drop-before-restore, or specific schemas to restore.
+  </Step>
+  <Step title="Review and execute">
+    Review the generated command and click **Run** to execute, or copy it to run manually.
+  </Step>
+</Steps>
+
+## Monitoring progress
+
+When you run backup or restore in-app, Beekeeper displays a live progress screen showing the last 100 lines of output from the underlying tool. If the process fails, the complete log is written to a temporary file so you can review the full output for debugging.
+
+<Tip>
+  For production databases, consider copying the generated command and running it in your own terminal. This gives you full control over environment variables, output redirection, and error handling.
+</Tip>

@@ -1,0 +1,220 @@
+---
+title: "Plugin Manifest Reference for Beekeeper Studio"
+description: "Complete reference for manifest.json: every field, type, and example you need to configure your Beekeeper Studio plugin's metadata and capabilities."
+---
+
+Every Beekeeper Studio plugin must include a `manifest.json` file in its root directory. This file defines your plugin's identity — its name, version, author, and the views and menu items it contributes to the application. Beekeeper Studio reads this file at startup to register your plugin and render its UI in the correct locations.
+
+<Warning>
+  The plugin system is in beta and available in Beekeeper Studio 5.3+. We'd love your feedback!
+</Warning>
+
+## Top-level fields
+
+<ParamField path="id" type="string" required>
+  Unique identifier for your plugin. Use only lowercase letters, numbers, and hyphens. This ID is used in the plugin registry, file naming (e.g., `{id}-{version}.zip`), and internal routing.
+</ParamField>
+
+<ParamField path="name" type="string" required>
+  Display name shown to users in the Plugin Manager and throughout the UI.
+</ParamField>
+
+<ParamField path="author" type="string | AuthorInfo" required>
+  Plugin author or organization name. Can be a plain string or an `AuthorInfo` object with a name and URL.
+</ParamField>
+
+<ParamField path="description" type="string" required>
+  Brief description of what your plugin does. Displayed in the Plugin Manager.
+</ParamField>
+
+<ParamField path="version" type="string" required>
+  Semantic version of your plugin (e.g., `"1.0.0"`, `"2.1.5"`). This must match the git tag used in your GitHub release.
+</ParamField>
+
+<ParamField path="capabilities" type="Capabilities" required>
+  Declares the views and menu items your plugin contributes to Beekeeper Studio.
+</ParamField>
+
+<ParamField path="manifestVersion" type="1 | 0" default="0">
+  Version of the manifest format. Use `1` for all new plugins. Version `0` uses a legacy `tabTypes` format and is supported only for backwards compatibility.
+</ParamField>
+
+<ParamField path="icon" type="string">
+  A Material UI icon name to represent your plugin in the UI. See [Material Icons](https://fonts.google.com/icons?icon.set=Material+Icons) for available options.
+</ParamField>
+
+<ParamField path="pluginEntryDir" type="string">
+  Path to your plugin's built files relative to the plugin root. Defaults to the project root. Use this when your build output lives in a subdirectory (e.g., `"dist"`).
+</ParamField>
+
+<ParamField path="minAppVersion" type="string">
+  Minimum version of Beekeeper Studio required to run this plugin (e.g., `"5.4.0"`). If not specified, the plugin is listed as compatible with all versions.
+</ParamField>
+
+<ParamField path="settings" type="unknown">
+  _(Planned)_ Configuration options that users can set via config files.
+</ParamField>
+
+<ParamField path="permissions" type="unknown">
+  _(Planned)_ Explicit permissions your plugin requires.
+</ParamField>
+
+## AuthorInfo object
+
+When `author` is an object rather than a plain string, it accepts these fields:
+
+<ParamField path="name" type="string" required>
+  Author or organization name.
+</ParamField>
+
+<ParamField path="url" type="string" required>
+  Author or organization URL.
+</ParamField>
+
+## Capabilities object
+
+<ParamField path="views" type="PluginView[]">
+  Array of view definitions that describe the iframe-based UIs your plugin provides.
+</ParamField>
+
+<ParamField path="menus" type="PluginMenuItem[]">
+  Array of menu item definitions that place commands in various locations throughout the application UI.
+</ParamField>
+
+## PluginView object
+
+<ParamField path="id" type="string" required>
+  Unique identifier for this view within your plugin. Referenced by `PluginMenuItem.view`.
+</ParamField>
+
+<ParamField path="name" type="string" required>
+  Display name shown in tabs and sidebars.
+</ParamField>
+
+<ParamField path="type" type="PluginViewType" required>
+  Controls how the view is rendered in the application. See [view types](#view-types) below.
+</ParamField>
+
+<ParamField path="entry" type="string" required>
+  Path to the HTML entry file relative to the plugin root (or `pluginEntryDir` if set). For Vite projects, this is typically `"dist/index.html"`.
+</ParamField>
+
+### View types
+
+| Value | Description |
+|-------|-------------|
+| `"shell-tab"` | Tab view with your plugin's iframe at the top and a collapsible result table at the bottom. Ideal for plugins that query and display data. |
+| `"plain-tab"` | Full-tab view — your plugin's iframe occupies the entire tab. |
+| `"primary-sidebar"` | _(Planned)_ Primary sidebar panel. |
+| `"secondary-sidebar"` | _(Planned)_ Secondary sidebar panel. |
+
+## PluginMenuItem object
+
+<ParamField path="command" type="string" required>
+  Identifier for this menu item. Also used as the `command` field in the view context returned by `getViewContext()`.
+</ParamField>
+
+<ParamField path="name" type="string" required>
+  User-facing label shown in the UI.
+</ParamField>
+
+<ParamField path="view" type="string">
+  ID of a view defined in `capabilities.views`. When the user clicks this menu item, Beekeeper Studio opens a new tab for that view.
+</ParamField>
+
+<ParamField path="placement" type="PluginMenuItemPlacement | PluginMenuItemPlacement[]">
+  Location (or array of locations) in the application where this menu item appears.
+</ParamField>
+
+<ParamField path="group" type="string">
+  _(Planned)_ Group identifier for sorting and grouping items within a placement.
+</ParamField>
+
+<ParamField path="order" type="number">
+  _(Planned)_ Numeric sort order within a group. Lower numbers appear first.
+</ParamField>
+
+### Menu placements
+
+| Value | Location |
+|-------|----------|
+| `"newTabDropdown"` | Dropdown shown when opening a new tab |
+| `"menubar.tools"` | Tools menu in the menu bar |
+| `"editor.query.context"` | Context menu inside the query editor |
+| `"results.cell.context"` | Context menu on a result cell |
+| `"results.columnHeader.context"` | Context menu on a result column header |
+| `"results.rowHeader.context"` | Context menu on a result row header |
+| `"results.corner.context"` | Context menu on the result table top-left corner |
+| `"tableTable.cell.context"` | Context menu on a table view cell |
+| `"tableTable.columnHeader.context"` | Context menu on a table view column header |
+| `"tableTable.rowHeader.context"` | Context menu on a table view row header |
+| `"tableTable.corner.context"` | Context menu on the table view top-left corner |
+| `"tab.query.header.context"` | Context menu on a query tab header |
+| `"tab.table.header.context"` | Context menu on a table tab header |
+| `"entity.table.context"` | Context menu on a table in the sidebar |
+| `"entity.schema.context"` | Context menu on a schema in the sidebar |
+| `"entity.routine.context"` | Context menu on a routine in the sidebar |
+
+## Example manifest
+
+```json manifest.json
+{
+  "id": "my-database-plugin",
+  "name": "Database Analyzer",
+  "author": {
+    "name": "Your Name",
+    "url": "https://yourwebsite.com"
+  },
+  "description": "Analyzes database performance and provides optimization suggestions.",
+  "version": "1.0.0",
+  "manifestVersion": 1,
+  "minAppVersion": "5.4.0",
+  "icon": "analytics",
+  "capabilities": {
+    "views": [
+      {
+        "id": "analyzer-tab",
+        "name": "Analyzer",
+        "type": "shell-tab",
+        "entry": "dist/index.html"
+      }
+    ],
+    "menus": [
+      {
+        "command": "openAnalyzer",
+        "name": "Open Analyzer",
+        "view": "analyzer-tab",
+        "placement": "menubar.tools"
+      },
+      {
+        "command": "analyzeTable",
+        "name": "Analyze Table",
+        "view": "analyzer-tab",
+        "placement": "entity.table.context"
+      }
+    ]
+  }
+}
+```
+
+## Legacy format (manifest v0)
+
+The original manifest format used a `tabTypes` array nested inside `capabilities.views`. This format is still supported but you should use manifest v1 for all new plugins.
+
+```json
+{
+  "manifestVersion": 0,
+  "capabilities": {
+    "views": {
+      "tabTypes": [
+        {
+          "id": "data-visualizer",
+          "name": "Data Visualizer",
+          "kind": "shell",
+          "entry": "tab.html"
+        }
+      ]
+    }
+  }
+}
+```

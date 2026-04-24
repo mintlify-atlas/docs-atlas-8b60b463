@@ -1,0 +1,96 @@
+---
+title: "Cloud Workspaces for Teams and Multi-Machine Use"
+description: "Store connections and queries in the cloud to work across multiple machines or collaborate with teammates in a shared Beekeeper Studio workspace."
+---
+
+Cloud workspaces let you keep your connections and saved queries in sync across every machine you use, and share them with teammates so your whole team works from the same set of data. Everything is accessed through the Beekeeper Studio desktop app — there is no separate web interface for running queries.
+
+<Note>
+  Cloud workspaces require an active Beekeeper Studio paid subscription. You can create and manage your workspace from the [account dashboard](https://app.beekeeperstudio.io).
+</Note>
+
+## Key concepts
+
+<CardGroup cols={2}>
+  <Card title="Workspace" icon="cloud">
+    An online collaborative space where members can access shared connections and queries. You get one workspace when you create a subscription.
+  </Card>
+  <Card title="Workspace member" icon="user">
+    Anyone with access to view and edit the workspace's queries and connections.
+  </Card>
+  <Card title="Workspace admin" icon="user-shield">
+    A member with elevated privileges, including the ability to invite new users to the workspace.
+  </Card>
+  <Card title="Workspace owner" icon="crown">
+    The person who created the workspace. Owners can add and remove members, promote members to admin, and manage the workspace.
+  </Card>
+  <Card title="Personal folder" icon="folder">
+    Every member has a personal folder where new connections and queries are saved by default. Items here are private — only you can see them.
+  </Card>
+  <Card title="Team folder" icon="folder-open">
+    Move a connection or query to the team folder to share it with everyone in the workspace.
+  </Card>
+</CardGroup>
+
+## Getting started
+
+<Steps>
+  <Step title="Create a workspace">
+    Click the **(+)** button in the global sidebar to create a workspace and give it a name. If you don't have a Beekeeper Studio account yet, you'll be redirected to the web interface to create one.
+  </Step>
+  <Step title="Add connections">
+    Click **Import** to bring in connections from your existing local workspace, or create new connections as usual. All connections added to the workspace are saved in the cloud automatically.
+  </Step>
+  <Step title="Connect to a database and add queries">
+    Once connected to a workspace connection, use Beekeeper Studio as normal. You can import your local saved queries into the workspace to make them available across machines.
+  </Step>
+  <Step title="Share with your team">
+    By default, new connections and queries land in your personal folder. To share something with your team, right-click the connection or query and select **Move to team**. Everyone in the workspace can access items in the team folder.
+  </Step>
+</Steps>
+
+<Tip>
+  When connected to a cloud workspace, you can only use connections and queries that belong to that workspace — not your local ones. This makes workspaces great for segmenting work by client, team, or project.
+</Tip>
+
+## Inviting team members
+
+Both workspace owners and admins can invite new members:
+
+<Steps>
+  <Step title="Sign in to your workspace">
+    Open Beekeeper Studio and connect to your workspace.
+  </Step>
+  <Step title="Open workspace settings">
+    Click the workspace name in the sidebar and select **Invite Users** from the menu.
+  </Step>
+  <Step title="Enter the email address">
+    Type the email address of the person you want to invite. They'll receive an email with instructions to join.
+  </Step>
+</Steps>
+
+## Managing workspace members
+
+### Promoting members to admin
+
+Only the workspace owner can promote members to admin status:
+
+<Steps>
+  <Step title="Open the dashboard">
+    Sign in to the [Beekeeper Studio dashboard](https://app.beekeeperstudio.io).
+  </Step>
+  <Step title="Go to workspace settings">
+    Navigate to your workspace settings and find the member in the list.
+  </Step>
+  <Step title="Promote to admin">
+    Click **Promote to Admin** next to the member's name.
+  </Step>
+</Steps>
+
+<Note>
+  Admins can invite new users but cannot promote other members to admin or remove admin status from existing admins. Only the owner has those privileges.
+</Note>
+
+## Deleting a workspace
+
+The workspace owner can delete the workspace from the [dashboard](https://app.beekeeperstudio.io). Deleted workspace data is archived for 30 days, then permanently deleted with no way to recover it.

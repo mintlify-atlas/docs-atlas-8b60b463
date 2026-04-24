@@ -1,0 +1,146 @@
+---
+title: "AI Shell: Natural Language Queries for Your Database"
+description: "Use the Beekeeper Studio AI Shell to ask questions about your data in plain English. Requires a paid subscription and the AI Shell plugin."
+---
+
+The Beekeeper Studio AI Shell brings an AI agent directly into your database workflow. Instead of writing SQL from scratch, you can ask questions about your data in plain English, let the AI explore your schema and relationships, and approve any SQL it wants to run — all without leaving the app.
+
+<Note>
+  The AI Shell requires a **paid Beekeeper Studio subscription** and the **AI Shell plugin** to be installed. See [Plugins](/user-guide/plugins) for installation instructions. All Beekeeper Studio downloads include a 14-day free trial.
+</Note>
+
+## How the AI Shell works
+
+The AI Shell is modeled after agentic coding tools. It has deep SQL awareness and can explore your schema, understand table relations and constraints, and write and execute queries — with your explicit permission — right inside Beekeeper Studio.
+
+The AI communicates directly with your chosen AI provider (such as Anthropic's Claude). Beekeeper Studio acts as no intermediary: your data goes from your machine to the AI provider you select, and nowhere else.
+
+## Accessing the AI Shell
+
+Open the AI Shell by creating a new tab and selecting the **AI Shell** tab type. It appears alongside your regular query tabs in the main editor area.
+
+## Getting started
+
+<Steps>
+  <Step title="Choose your AI provider">
+    Select your preferred AI provider. Currently, Anthropic is supported (with more providers in development).
+  </Step>
+  <Step title="Enter your API key">
+    Paste your API key from your provider's dashboard. Your key is stored locally and never sent to Beekeeper Studio servers.
+  </Step>
+  <Step title="Ask a question">
+    Type a question in plain English, such as "Which customers placed orders in the last 30 days?" or "What tables reference the users table?".
+  </Step>
+  <Step title="Review and approve SQL">
+    The AI explores your schema and proposes SQL to answer your question. Review the query and click to approve or reject it before it runs.
+  </Step>
+  <Step title="View results and iterate">
+    Results appear in the built-in result viewer. Ask follow-up questions to refine or extend the analysis.
+  </Step>
+</Steps>
+
+## What the AI can access
+
+The AI agent has access to the following tools within Beekeeper Studio:
+
+- Listing schemas, tables, views, functions, and procedures
+- Viewing table relations and constraints
+- Looking at your saved queries for guidance
+- Checking your open tabs for guidance
+- Writing and executing SQL (with your explicit approval)
+
+<Warning>
+  The AI Shell will send the following information to your chosen AI provider: table names and column names, table structure (relations and indexes), previously executed SQL queries, results of approved queries, and any query execution errors. Review your AI provider's data policies before use.
+</Warning>
+
+## Permissions and SQL execution
+
+The AI Shell always asks for your explicit consent before running SQL. You can review each query and reject it if you have concerns. For read-only queries, you can optionally allow the AI to run them without prompting:
+
+<Steps>
+  <Step title="Open AI Shell settings">
+    Click the settings icon (⚙️) inside the AI Shell tab.
+  </Step>
+  <Step title="Go to the General tab">
+    Select the **General** tab in the settings panel.
+  </Step>
+  <Step title="Enable automatic read-only execution">
+    Toggle **Always allow execution of read-only queries**.
+  </Step>
+</Steps>
+
+## Custom instructions
+
+You can provide custom instructions to shape how the AI Shell responds. Your instructions are added to every message you send as a system prompt, ensuring consistent behavior across sessions.
+
+<Steps>
+  <Step title="Open settings">
+    Click the settings icon (⚙️) in the AI Shell tab.
+  </Step>
+  <Step title="Go to the General tab">
+    Select the **General** tab.
+  </Step>
+  <Step title="Add your instructions">
+    Type your custom instructions in the provided text field.
+  </Step>
+</Steps>
+
+## Pricing
+
+The AI Shell is included in all paid versions of Beekeeper Studio at no additional charge. You are responsible for any costs your AI provider charges based on usage, as Beekeeper Studio does not proxy or meter those requests.
+
+## Disabling the AI Shell
+
+To disable the AI Shell for a user or across a managed deployment, add the following to your [configuration file](/user-guide/configuration):
+
+```ini
+[plugins.bks-ai-shell]
+disabled = true
+```
+
+When set in an administrator `system.config.ini`, this disables the feature even if the user has previously entered an API key.
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="AI Shell cannot connect to Ollama (CORS error)">
+    If you're running a local Ollama instance and the AI Shell cannot connect, you need to allow requests from Beekeeper Studio by setting the `OLLAMA_ORIGINS` environment variable.
+
+    **macOS**
+
+    ```bash
+    # Allow all origins
+    launchctl setenv OLLAMA_ORIGINS "*"
+
+    # Allow only Beekeeper Studio
+    launchctl setenv OLLAMA_ORIGINS "plugin://*"
+    ```
+
+    **Windows**
+
+    1. Press **Windows + R**, type `sysdm.cpl`, and press **OK**.
+    2. Go to **Advanced > Environment Variables**.
+    3. Add or edit the variable `OLLAMA_ORIGINS` with the value `*` or `plugin://*`.
+
+    **Linux**
+
+    Edit the Ollama service config:
+
+    ```bash
+    sudo systemctl edit ollama.service
+    ```
+
+    Add the following:
+
+    ```
+    [Service]
+    Environment="OLLAMA_ORIGINS=plugin://*"
+    ```
+
+    Then restart:
+
+    ```bash
+    sudo systemctl restart ollama
+    ```
+  </Accordion>
+</AccordionGroup>

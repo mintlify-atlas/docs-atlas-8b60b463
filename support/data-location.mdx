@@ -1,0 +1,139 @@
+---
+title: "Where Beekeeper Studio Stores Your Data and Config Files"
+description: "Find where Beekeeper Studio saves connections, queries, logs, and license files on macOS, Windows, and Linux — and learn how to back up your data."
+---
+
+Beekeeper Studio stores all your saved connections, SQL queries, and application settings in a SQLite database called `app.db`. This file lives in the operating system's designated user data directory for the app. Knowing where this file lives lets you back it up, migrate it to a new machine, or inspect it directly.
+
+## Data directory locations
+
+<Tabs>
+  <Tab title="Linux">
+    **Standard install:**
+    ```
+    ~/.config/beekeeper-studio/
+    ```
+
+    **Snap install:**
+    ```
+    ~/snap/beekeeper-studio/current/.config/beekeeper-studio/
+    ```
+
+    Key files in this directory:
+
+    | File / Folder | Contents |
+    |---|---|
+    | `app.db` | All saved connections, queries, and query history |
+    | `logs/` | Application log files |
+    | `license.json` | Offline license key (if used) |
+    | `bks-flags.conf` | Custom Electron startup flags |
+  </Tab>
+  <Tab title="macOS">
+    ```
+    ~/Library/Application Support/Beekeeper Studio/
+    ```
+
+    <Note>
+      The `~/Library` directory is hidden in Finder by default. To open it, use **Go → Go to Folder** in the menu bar and type `~/Library/Application Support/Beekeeper Studio`.
+    </Note>
+
+    Key files in this directory:
+
+    | File / Folder | Contents |
+    |---|---|
+    | `app.db` | All saved connections, queries, and query history |
+    | `logs/` | Application log files |
+    | `license.json` | Offline license key (if used) |
+  </Tab>
+  <Tab title="Windows">
+    ```
+    %USERPROFILE%\AppData\Roaming\beekeeper-studio\
+    ```
+
+    You can paste this path directly into File Explorer's address bar to navigate there.
+
+    Key files in this directory:
+
+    | File / Folder | Contents |
+    |---|---|
+    | `app.db` | All saved connections, queries, and query history |
+    | `logs\` | Application log files |
+    | `license.json` | Offline license key (if used) |
+  </Tab>
+</Tabs>
+
+## What's stored in app.db
+
+The `app.db` file is a standard SQLite database. It holds:
+
+- **Saved connections** — database hosts, ports, credentials, and SSH tunnel settings
+- **Saved SQL queries** — any queries you've saved for reuse
+- **Query run history** — a log of recently executed queries
+- **Application preferences** — theme, layout, and other settings
+
+## Exploring your data from within Beekeeper Studio
+
+You can open your own Beekeeper Studio database directly in the app:
+
+<Steps>
+  <Step title="Open the Help menu">
+    Click **Help → Add Beekeeper's Database** in the menu bar.
+  </Step>
+  <Step title="Connect to the internal database">
+    Beekeeper Studio adds a new connection pointing to `app.db` and opens it automatically.
+  </Step>
+  <Step title="Browse and export your data">
+    You can browse saved connections, export SQL queries to a file, or run any SQL you like against your own data.
+  </Step>
+</Steps>
+
+<Tip>
+  This is a convenient way to export all your saved queries as SQL or CSV if you're migrating to a new machine or want a plain-text backup.
+</Tip>
+
+## Backing up your data
+
+To back up your Beekeeper Studio data, copy the entire user data directory listed above to a safe location. The most important file is `app.db`. To restore from a backup, quit Beekeeper Studio and replace the `app.db` file in the data directory with your backup copy.
+
+<Warning>
+  Always quit Beekeeper Studio before copying `app.db`. Copying a SQLite database while it's actively in use may result in a corrupted backup.
+</Warning>
+
+## Migrating to a new machine
+
+<Steps>
+  <Step title="Quit Beekeeper Studio on the old machine">
+    Make sure the app is fully closed before copying files.
+  </Step>
+  <Step title="Copy the data directory">
+    Copy the entire data directory from the old machine to the same location on the new machine.
+  </Step>
+  <Step title="Install Beekeeper Studio on the new machine">
+    Download and install Beekeeper Studio from [beekeeperstudio.io](https://beekeeperstudio.io/get-community) or [GitHub releases](https://github.com/beekeeper-studio/beekeeper-studio/releases/latest).
+  </Step>
+  <Step title="Launch the app">
+    All your saved connections, queries, and history will be available immediately.
+  </Step>
+</Steps>
+
+## Log file locations
+
+Application logs are useful when troubleshooting issues. See the [troubleshooting guide](/support/troubleshooting) for instructions on enabling verbose debug logging.
+
+<Tabs>
+  <Tab title="Linux">
+    ```
+    ~/.config/beekeeper-studio/logs/{process type}.log
+    ```
+  </Tab>
+  <Tab title="macOS">
+    ```
+    ~/Library/Logs/beekeeper-studio/{process type}.log
+    ```
+  </Tab>
+  <Tab title="Windows">
+    ```
+    %USERPROFILE%\AppData\Roaming\beekeeper-studio\logs\{process type}.log
+    ```
+  </Tab>
+</Tabs>

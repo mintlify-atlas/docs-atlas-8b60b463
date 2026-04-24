@@ -1,0 +1,62 @@
+---
+title: "Entity Relationship Diagrams (ERD) in Beekeeper Studio"
+description: "Visualize your database schema with Beekeeper Studio's interactive ERD, including cross-schema relationships, table navigation, and image export."
+---
+
+Beekeeper Studio's Entity Relationship Diagram (ERD) feature gives you an interactive visual map of your database schema — showing tables, columns, and the relationships between them. It is useful for understanding an unfamiliar schema, documenting a design, or quickly identifying how tables connect before writing a complex join query.
+
+## Opening the ERD
+
+There are three ways to open the diagram:
+
+<Steps>
+  <Step title="App menu">
+    Go to **Tools → Open ER Diagram** to open the diagram for the active database.
+  </Step>
+  <Step title="Sidebar right-click">
+    Right-click any table or schema in the left sidebar and select **Open ER Diagram**.
+  </Step>
+  <Step title="Structure tab">
+    While viewing a table's structure, click the **⚙** button on the status bar and select **View ERD**.
+  </Step>
+</Steps>
+
+## Reading the diagram
+
+The ERD displays each table as a node with its column list. Lines between tables represent foreign key relationships. You can:
+
+- **Pan** the diagram by clicking and dragging the canvas
+- **Zoom** in and out to focus on specific areas
+- **Click a table** to highlight its direct relationships
+
+### Cross-schema relationships
+
+The ERD can display relationships that cross schema boundaries. Tables from other schemas appear in the diagram with a clear visual distinction so you always know when a relationship extends beyond the active schema.
+
+<Info>
+  Multi-schema relationship visibility depends on the permissions of your database connection. If a related table lives in a schema your user cannot access, it may not appear.
+</Info>
+
+## Exporting the diagram
+
+You can save the current ERD as an image to share with your team or include in documentation:
+
+<Steps>
+  <Step title="Open the export dialog">
+    Click the export button in the ERD toolbar to open the export dialog.
+  </Step>
+  <Step title="Choose scale and format">
+    Select a scale factor to control the resolution of the exported image.
+  </Step>
+  <Step title="Export or copy">
+    Click **Export** to save the diagram as an image file, or **Copy** to place it on your clipboard for pasting directly into a document or chat.
+  </Step>
+</Steps>
+
+## Availability
+
+The ER Diagram is included in all paid versions of Beekeeper Studio at no additional charge. Every download of Beekeeper Studio includes a 14-day free trial so you can try the ERD immediately.
+
+<Note>
+  The ERD is not available in the free community (open-source) edition of Beekeeper Studio.
+</Note>

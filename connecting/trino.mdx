@@ -1,0 +1,92 @@
+---
+title: "Connect to Trino in Beekeeper Studio"
+description: "Connect to a Trino coordinator via HTTP or HTTPS to query distributed data across catalogs. Supports SSL certificate modes. Requires the Ultimate edition."
+---
+
+Beekeeper Studio connects to a Trino coordinator, giving you access to all the catalogs and schemas registered in your cluster. Connect over HTTP or HTTPS, with optional SSL certificate verification. Trino (and Presto, which uses the same wire protocol) support is in active development.
+
+<Note>
+  Trino requires the **Ultimate** (paid) edition of Beekeeper Studio.
+</Note>
+
+<Note>
+  Trino support is an early implementation focused primarily on read operations. Write operations should be performed through your underlying data sources directly.
+</Note>
+
+## Connection details
+
+| Field | Default | Description |
+|---|---|---|
+| Host | — | Hostname or IP address of your Trino coordinator |
+| Port | `8080` (HTTP) / `8443` (HTTPS) | Port the coordinator listens on |
+| Username | `default` | Trino username |
+| Password | — | Trino password (if required) |
+| Default Catalog | — | Catalog to connect to on startup (optional) |
+
+## Connect from the app
+
+<Steps>
+  <Step title="Open the connection screen">
+    Launch Beekeeper Studio and open the connection screen.
+  </Step>
+  <Step title="Select Trino">
+    Choose **Trino** from the connection type dropdown.
+  </Step>
+  <Step title="Enter coordinator details">
+    Fill in the **host**, **port**, **username**, and optionally **password** and **default catalog** fields. These are the Trino coordinator's details — not the underlying databases.
+  </Step>
+  <Step title="Configure SSL (if needed)">
+    If your coordinator uses HTTPS, enable **SSL** in the connection form and choose an SSL mode (see below).
+  </Step>
+  <Step title="Test your connection">
+    Click **Test Connection** to verify Beekeeper Studio can reach the coordinator.
+  </Step>
+  <Step title="Save and connect">
+    Enter a name, optionally check **Save Passwords**, click **Save**, then click **Connect**.
+  </Step>
+</Steps>
+
+## SSL / HTTPS
+
+Beekeeper Studio supports three SSL modes for Trino connections.
+
+<AccordionGroup>
+  <Accordion title="Trust the server certificate">
+    Enable SSL without providing any certificate files. Beekeeper Studio connects over HTTPS but does not verify the server's certificate. This is the simplest option and works with self-signed certificates.
+  </Accordion>
+  <Accordion title="Provide a CA certificate">
+    If your Trino server uses a certificate signed by a private CA, provide the CA certificate file. Leave **Reject Unauthorized** unchecked to allow the connection without full hostname verification.
+  </Accordion>
+  <Accordion title="Full certificate verification">
+    Provide the CA certificate and optionally a client certificate and key file, then enable **Reject Unauthorized** to enforce complete TLS verification.
+  </Accordion>
+</AccordionGroup>
+
+<Tip>
+  If you import a connection URL that starts with `https://`, SSL is enabled automatically and the port defaults to `8443`.
+</Tip>
+
+## Supported features
+
+<CardGroup cols={2}>
+  <Card title="SSL / HTTPS" icon="shield">
+    Connect securely with optional CA, client cert, and key files.
+  </Card>
+  <Card title="Table data view" icon="table">
+    Browse tables across all registered catalogs.
+  </Card>
+  <Card title="Sort and filter" icon="filter">
+    Sort and filter query results.
+  </Card>
+  <Card title="Table structure view" icon="list">
+    Inspect schemas and column definitions.
+  </Card>
+  <Card title="Export results" icon="download">
+    Download query results as JSON, CSV, or Markdown.
+  </Card>
+</CardGroup>
+
+## Still in progress
+
+- SSH tunneling
+- Running queries directly to a file

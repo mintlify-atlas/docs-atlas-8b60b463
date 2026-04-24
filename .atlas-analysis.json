@@ -1,23 +1,11 @@
 {
-  "$schema": "https://mintlify.com/docs.json",
-  "name": "Beekeeper Studio",
+  "projectType": "saas",
+  "projectName": "Beekeeper Studio",
+  "projectDescription": "A modern, cross-platform SQL editor and database manager for MySQL, PostgreSQL, SQLite, SQL Server, and 15+ other databases, available for Linux, macOS, and Windows.",
   "theme": "almond",
-  "colors": {
-    "primary": "#fcdc3c",
-    "light": "#7c631d"
-  },
-  "favicon": "https://media.brand.dev/9d9383c4-0fb9-4c6e-910b-5bd4a3522de3.svg",
-  "navbar": {
-    "primary": {
-      "type": "github",
-      "href": "https://github.com/beekeeper-studio/beekeeper-studio"
-    }
-  },
-  "footer": {
-    "socials": {
-      "github": "https://github.com/beekeeper-studio/beekeeper-studio"
-    }
-  },
+  "primaryColor": "#fcdc3c",
+  "lightColor": "#7c631d",
+  "darkColor": null,
   "navigation": {
     "tabs": [
       {
@@ -122,5 +110,51 @@
         ]
       }
     ]
-  }
+  },
+  "keyFeatures": [
+    "Cross-platform desktop app for macOS, Windows, and Linux",
+    "Support for 20+ databases including PostgreSQL, MySQL, SQLite, SQL Server, MongoDB, Redis, BigQuery, and more",
+    "Autocomplete SQL query editor with syntax highlighting",
+    "Visual table data editor with sorting and filtering",
+    "Table structure editor and schema management",
+    "Data import (CSV/JSON) and export (CSV, JSON, Excel, etc.)",
+    "Entity Relationship Diagrams (ERD)",
+    "Cloud workspaces for cross-machine and team collaboration",
+    "SSH tunneling and secure connections",
+    "Plugin system for extending functionality",
+    "AI Shell plugin for natural-language database queries",
+    "Privacy mode for screen-sharing sessions",
+    "Saved queries and query history",
+    "PIN lock mode and enterprise security configuration",
+    "Dark and light themes"
+  ],
+  "publicApiSurface": [
+    "@beekeeperstudio/plugin: getSchemas()",
+    "@beekeeperstudio/plugin: getTables(schema?)",
+    "@beekeeperstudio/plugin: getColumns(table, schema?)",
+    "@beekeeperstudio/plugin: getTableKeys(table, schema?)",
+    "@beekeeperstudio/plugin: getPrimaryKeys(table, schema?)",
+    "@beekeeperstudio/plugin: getTableIndexes(table, schema?)",
+    "@beekeeperstudio/plugin: runQuery(query)",
+    "@beekeeperstudio/plugin: getConnectionInfo()",
+    "@beekeeperstudio/plugin: openTab(type, options?)",
+    "@beekeeperstudio/plugin: getViewContext()",
+    "@beekeeperstudio/plugin: getViewState()",
+    "@beekeeperstudio/plugin: setViewState(state)",
+    "@beekeeperstudio/plugin: getData(key?)",
+    "@beekeeperstudio/plugin: setData(key, value)",
+    "@beekeeperstudio/plugin: getEncryptedData(key)",
+    "@beekeeperstudio/plugin: setEncryptedData(key, value)",
+    "@beekeeperstudio/plugin: requestFileSave(options)",
+    "@beekeeperstudio/plugin: getAppInfo()",
+    "@beekeeperstudio/plugin: setTabTitle(title)",
+    "@beekeeperstudio/plugin: expandTableResult(results)",
+    "@beekeeperstudio/plugin: broadcast.post(message)",
+    "@beekeeperstudio/plugin: broadcast.on(callback)",
+    "@beekeeperstudio/plugin: noty.info/success/error/warning(message)",
+    "@beekeeperstudio/plugin: confirm(title?, message?, options?)",
+    "@beekeeperstudio/plugin: clipboard.writeText/readText/writeImage()",
+    "@beekeeperstudio/plugin: addNotificationListener(name, handler)",
+    "@beekeeperstudio/plugin: removeNotificationListener(name, handler)"
+  ]
 }

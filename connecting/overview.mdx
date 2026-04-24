@@ -1,0 +1,168 @@
+---
+title: "Connecting to Databases — Beekeeper Studio"
+description: "Beekeeper Studio supports 20+ databases. Learn which are in each edition, and how to configure host, port, SSL modes, and SSH tunnels for any connection."
+---
+
+Beekeeper Studio lets you connect to more than 20 databases from a single desktop app, with full feature parity across Windows, macOS, and Linux. Whether you're working with a local SQLite file or a cloud-managed cluster, the connection workflow is the same: pick a connection type, fill in your credentials, and click **Connect**.
+
+## Supported databases
+
+The table below shows which databases are available in each edition.
+
+| Database | Community | Ultimate |
+|---|:---:|:---:|
+| PostgreSQL | ✅ | ✅ |
+| MySQL | ✅ | ✅ |
+| SQLite | ✅ | ✅ |
+| SQL Server | ✅ | ✅ |
+| Amazon Redshift | ✅ | ✅ |
+| CockroachDB | ✅ | ✅ |
+| MariaDB | ✅ | ✅ |
+| TiDB | ✅ | ✅ |
+| Google BigQuery | ✅ | ✅ |
+| Redis | ✅ | ✅ |
+| Oracle Database | — | ✅ |
+| Cassandra / ScyllaDB | — | ✅ |
+| Firebird | — | ✅ |
+| LibSQL | — | ✅ |
+| ClickHouse | — | ✅ |
+| DuckDB | — | ✅ |
+| SQL Anywhere | — | ✅ |
+| MongoDB | — | ✅ |
+| Trino / Presto | — | ✅ |
+| SurrealDB | — | ✅ |
+
+<Note>
+  Oracle Database, ClickHouse, DuckDB, MongoDB, Firebird, SurrealDB, and Trino require the **Ultimate** (paid) edition. All other databases in the table are available in the free Community edition.
+</Note>
+
+## Quick links
+
+<CardGroup cols={3}>
+  <Card title="SQLite" icon="database" href="/connecting/sqlite">
+    Open local `.db`, `.sqlite`, or `.sqlite3` files by double-clicking or from the app.
+  </Card>
+  <Card title="PostgreSQL" icon="database" href="/connecting/postgresql">
+    Full-featured PostgreSQL support, including SSL and SSH tunneling.
+  </Card>
+  <Card title="MySQL" icon="database" href="/connecting/mysql">
+    Connect to MySQL and MariaDB using host/port or a Unix socket.
+  </Card>
+  <Card title="Google BigQuery" icon="cloud" href="/connecting/bigquery">
+    Authenticate with a service account JSON key and your Cloud Project ID.
+  </Card>
+  <Card title="MongoDB" icon="leaf" href="/connecting/mongodb">
+    Browse, filter, and edit MongoDB collections with SQL or a shell.
+  </Card>
+  <Card title="Redis" icon="server" href="/connecting/redis">
+    Browse keys, edit values, and use the AI shell with optional ReJSON support.
+  </Card>
+  <Card title="Oracle Database" icon="database" href="/connecting/oracle">
+    Thin and thick mode connections, tnsnames.ora support. Ultimate only.
+  </Card>
+  <Card title="ClickHouse" icon="database" href="/connecting/clickhouse">
+    Connect via native port 9000 with optional TLS and SSH tunneling.
+  </Card>
+  <Card title="DuckDB" icon="database" href="/connecting/duckdb">
+    Open local `.duckdb` files and query CSV, Parquet, and JSON directly.
+  </Card>
+  <Card title="SurrealDB" icon="database" href="/connecting/surrealdb">
+    Connect over WebSocket or HTTP with multiple auth methods.
+  </Card>
+  <Card title="Trino" icon="database" href="/connecting/trino">
+    Query distributed data across catalogs via a Trino coordinator.
+  </Card>
+  <Card title="Amazon RDS" icon="cloud" href="/connecting/amazon-rds">
+    Use IAM authentication to connect to RDS without a static password.
+  </Card>
+  <Card title="CockroachDB" icon="database" href="/connecting/cockroachdb">
+    PostgreSQL-compatible with Cockroach Cloud cluster ID and JWT auth support.
+  </Card>
+  <Card title="Firebird" icon="database" href="/connecting/firebird">
+    Connect to Firebird 3+ with legacy authentication. Ultimate only.
+  </Card>
+  <Card title="Azure Entra ID" icon="cloud" href="/connecting/azure-entraid">
+    SSO authentication for Azure-hosted MySQL, PostgreSQL, and SQL Server.
+  </Card>
+</CardGroup>
+
+## Connection modes
+
+You can connect to most network databases in one of two modes.
+
+**Socket** connects through a Unix domain socket on the local machine. This is the default for MySQL installations and doesn't require a hostname. Socket connections do not support SSL, SSH tunneling, or other advanced options.
+
+**TCP (host/port)** connects over the network using a hostname and port number. This mode supports all advanced features including SSL and SSH tunnels.
+
+<Tip>
+  If your database server is on the same machine, a socket connection is the simplest option. For any remote server, use TCP.
+</Tip>
+
+## SSL
+
+Beekeeper Studio offers three SSL modes for TCP connections.
+
+| Mode | SSL enabled | Certificate verification |
+|---|:---:|:---:|
+| Trust the server | ✅ | Off |
+| Required cert | ✅ | Off (rejectUnauthorized = false) |
+| Verified cert | ✅ | On (rejectUnauthorized = true) |
+
+The table below maps the standard `sslmode` values from command-line clients to Beekeeper Studio's SSL modes.
+
+| sslmode | SSL enabled | rejectUnauthorized |
+|---|:---:|:---:|
+| disable / allow / prefer | No | n/a |
+| require / verify-ca | Yes | false |
+| verify-full | Yes | true |
+
+You can supply custom CA, client certificate, and client key files for any of the certificate-based modes.
+
+## SSH tunneling
+
+Beekeeper Studio can route your database connection through an SSH server, useful when the database is on a private network.
+
+<Steps>
+  <Step title="Enable the SSH tunnel">
+    On the connection form, expand the **SSH Tunnel** section and toggle it on.
+  </Step>
+  <Step title="Enter the SSH server details">
+    Provide the SSH **hostname** (or IP address) and **port** (default: 22). If your network requires a JumpHost, enter it in the **Bastion Host** field.
+  </Step>
+  <Step title="Choose an authentication method">
+    Select one of:
+    - **SSH Agent** — uses your local SSH agent; only your SSH username is required.
+    - **Username and password** — enter your SSH username and password.
+    - **Key file** — select your private key file and enter the passphrase if applicable.
+  </Step>
+  <Step title="Set a keepalive interval (optional)">
+    Enter an interval in seconds to prevent idle disconnects. This is equivalent to `ServerAliveInterval` in `~/.ssh/config`. Enter `0` to disable.
+  </Step>
+  <Step title="Connect">
+    Click **Connect**. Beekeeper Studio opens the SSH tunnel before establishing the database connection.
+  </Step>
+</Steps>
+
+<Warning>
+  Before using an SSH tunnel, ensure your SSH server has `AllowTcpForwarding yes` set in `/etc/ssh/sshd_config`. If you use `ssh-rsa` keys, also add `PubkeyAcceptedKeyTypes +ssh-rsa`.
+</Warning>
+
+## File associations and URL handling
+
+For file-based databases (SQLite, DuckDB), Beekeeper Studio registers file associations at install time so you can double-click files to open them directly.
+
+For network databases, you can open a connection URL from the terminal:
+
+```bash
+# macOS
+open postgresql://user@host/database
+
+# Linux
+xdg-open postgresql://user@host/database
+```
+
+You can also paste a connection URL into the URL import box at the top of the connection form inside the app.
+
+## Demo database
+
+Every new Beekeeper Studio installation includes a **Demo Database** — a small SQLite file bundled with the app. You can use it to explore the interface without connecting to a real database. Look for it in the right-hand connection list on startup.

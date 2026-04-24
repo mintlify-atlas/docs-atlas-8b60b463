@@ -1,0 +1,82 @@
+---
+title: "Connect to CockroachDB in Beekeeper Studio"
+description: "Connect to self-hosted or Cockroach Cloud clusters using PostgreSQL-compatible settings. Supports Cloud cluster IDs and JWT authentication for SSO clusters."
+---
+
+CockroachDB uses the PostgreSQL wire protocol, so connecting to it from Beekeeper Studio works the same way as a standard PostgreSQL connection. This page focuses on the two CockroachDB-specific options you'll find on the connection form: the Cockroach Cloud cluster ID and JWT authentication.
+
+<Note>
+  CockroachDB is available in the free **Community** edition of Beekeeper Studio.
+</Note>
+
+## Basic connection
+
+<Steps>
+  <Step title="Open the connection screen">
+    Launch Beekeeper Studio and open the connection screen.
+  </Step>
+  <Step title="Select CockroachDB">
+    Choose **CockroachDB** from the connection type dropdown.
+  </Step>
+  <Step title="Enter connection details">
+    Fill in the **host**, **port** (default: `26257`), **username**, **password**, and **database** fields.
+  </Step>
+  <Step title="Enable SSL">
+    SSL is typically required for Cockroach Cloud clusters. Beekeeper Studio's default "trust the server" SSL mode works with Cockroach Cloud's certificates.
+  </Step>
+  <Step title="Connect">
+    Click **Connect**.
+  </Step>
+</Steps>
+
+<Tip>
+  If you have a PostgreSQL-style connection string from the Cockroach Console, paste it into the URL import box. Beekeeper Studio extracts the cluster ID and Cockroach-specific options automatically.
+</Tip>
+
+## Cockroach Cloud cluster ID
+
+Cockroach Cloud multi-tenant clusters require a **cluster routing ID** so the gateway knows which tenant to route your connection to. Without it, connections to serverless or dedicated clusters will fail.
+
+**Finding your cluster ID:**
+1. Open the Cockroach Cloud Console.
+2. Go to **Connect** → **Parameters only** → look at the `options` parameter.
+3. Copy the value after `--cluster=`.
+
+**Using it in Beekeeper Studio:**
+Paste just the cluster ID (the part after `--cluster=`) into the **CockroachDB Cloud Cluster ID** field. Beekeeper Studio adds the `--cluster=` prefix automatically.
+
+## JWT authentication
+
+Cockroach clusters with JWT authentication enabled let you sign in with a short-lived JSON Web Token instead of a password. This is the recommended flow for clusters configured with SSO.
+
+### Requirements
+
+- JWT authentication is enabled on your cluster (`server.jwt_authentication.enabled = true` with a configured JWKS endpoint).
+- You have a signed JWT whose `sub` claim matches a CockroachDB SQL username, with the correct `iss` and `aud` claims for your cluster.
+
+For server-side setup, see the [CockroachDB JWT documentation](https://www.cockroachlabs.com/docs/stable/sso-sql.html).
+
+### Connect with JWT
+
+<Steps>
+  <Step title="Open the authentication method dropdown">
+    On the CockroachDB connection form, open the **Authentication Method** dropdown and select **JWT**.
+  </Step>
+  <Step title="Fill in connection fields">
+    Enter the **host**, **port**, **database**, and **username** as usual. The username must match the `sub` claim in your JWT.
+  </Step>
+  <Step title="Paste your JWT">
+    Paste your JWT into the **JWT Token** field (the same field as the password, relabelled when JWT mode is active).
+  </Step>
+  <Step title="Connect">
+    Click **Connect**. Beekeeper Studio sends the JWT as the password and adds `--crdb:jwt_auth_enabled=true` to the startup options.
+  </Step>
+</Steps>
+
+<Note>
+  When JWT auth is selected, **Save Passwords** is automatically disabled. JWTs are short-lived, so saving them to disk is not useful — you'll paste a fresh token each time you connect. If a connection drops and Beekeeper tries to reconnect, you'll be prompted for a new JWT.
+</Note>
+
+<Tip>
+  Beekeeper Studio strips whitespace (including newlines) from the token before sending it, so tokens that wrap across lines when you paste them work correctly.
+</Tip>

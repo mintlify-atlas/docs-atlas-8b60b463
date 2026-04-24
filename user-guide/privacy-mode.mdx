@@ -1,0 +1,33 @@
+---
+title: "Privacy Mode: Hide Sensitive Connection Details"
+description: "Enable privacy mode in Beekeeper Studio to hide host, port, and database details from your screen when sharing or presenting to others."
+---
+
+Privacy mode lets you hide sensitive connection details from your screen so you can share your display, record a demo, or work in a public space without exposing database hostnames, ports, or credentials to anyone watching.
+
+## Toggling privacy mode
+
+Hover over the sidebar to reveal the **Toggle Privacy Mode** button, represented by an eye icon. Click it to turn privacy mode on or off. The eye icon changes state to confirm which mode is active.
+
+## What gets hidden
+
+When privacy mode is on, Beekeeper Studio conceals the following information:
+
+<CardGroup cols={2}>
+  <Card title="Host, port, and database in saved connections" icon="eye-slash">
+    The connection list in the sidebar masks the host, port, and database name for all saved connections.
+  </Card>
+  <Card title="Full URL tooltip on hover" icon="eye-slash">
+    The pop-up that normally shows the full connection URL when you hover over a saved connection is suppressed.
+  </Card>
+  <Card title="Host, port, and database in connection settings" icon="eye-slash">
+    When you open a connection's settings panel, the host, port, and database fields are obscured.
+  </Card>
+  <Card title="URL tooltip after connecting" icon="eye-slash">
+    The tooltip that appears when hovering over the database name in the header after you've connected is hidden.
+  </Card>
+</CardGroup>
+
+<Tip>
+  Privacy mode only hides connection metadata — your query results and table data are not affected. If you need to hide data in query results, consider using the [query editor](/user-guide/sql-editor) with a limited result set before sharing your screen.
+</Tip>

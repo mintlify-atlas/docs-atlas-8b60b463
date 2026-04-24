@@ -1,0 +1,1078 @@
+---
+title: "Beekeeper Studio Plugin API Reference"
+description: "Complete reference for @beekeeperstudio/plugin: database access, query execution, storage, toast notifications, UI controls, clipboard, and all type definitions."
+---
+
+The `@beekeeperstudio/plugin` package is the official communication layer between your plugin and Beekeeper Studio. Every function in this package wraps a `postMessage`-based request to the host application and returns a typed Promise. Install the package before using any of the APIs below.
+
+<Warning>
+  The plugin system is in beta and available in Beekeeper Studio 5.3+. The API may change between versions.
+</Warning>
+
+## Installation
+
+<CodeGroup>
+
+```bash npm
+npm install @beekeeperstudio/plugin
+```
+
+```bash yarn
+yarn add @beekeeperstudio/plugin
+```
+
+</CodeGroup>
+
+Import individual functions from the package root:
+
+```typescript
+import { getTables, runQuery, getAppInfo } from "@beekeeperstudio/plugin";
+```
+
+Also import the event forwarder at your entry point to enable proper keyboard and mouse event handling within the iframe:
+
+```typescript
+import "@beekeeperstudio/plugin/dist/eventForwarder.js";
+```
+
+---
+
+## Debugging
+
+### setDebugComms
+
+Enables verbose logging of all `postMessage` communication between your plugin and Beekeeper Studio. Useful during development to inspect request/response pairs.
+
+```typescript
+function setDebugComms(enabled: boolean): void
+```
+
+```typescript
+import { setDebugComms } from "@beekeeperstudio/plugin";
+setDebugComms(true);
+```
+
+### log.error
+
+Logs an error message to the Beekeeper Studio application log.
+
+```typescript
+function error(err: string | Error): void
+```
+
+```typescript
+import { log } from "@beekeeperstudio/plugin";
+log.error("An error occurred in the plugin");
+log.error(new Error("Something went wrong"));
+```
+
+---
+
+## Database schema
+
+### getSchemas
+
+Returns a list of schemas available in the current database connection.
+
+```typescript
+async function getSchemas(): Promise<string[]>
+```
+
+```typescript
+import { getSchemas } from "@beekeeperstudio/plugin";
+const schemas = await getSchemas();
+// ["public", "information_schema", "pg_catalog"]
+```
+
+### getTables
+
+Returns a list of tables in the current database. Pass a schema name to filter results.
+
+```typescript
+async function getTables(schema?: string): Promise<{ name: string; schema?: string }[]>
+```
+
+```typescript
+import { getTables } from "@beekeeperstudio/plugin";
+
+// All tables
+const tables = await getTables();
+
+// Tables in a specific schema
+const publicTables = await getTables("public");
+// [{ name: "users", schema: "public" }, { name: "orders", schema: "public" }]
+```
+
+### getColumns
+
+Returns column information for a specific table.
+
+```typescript
+async function getColumns(table: string, schema?: string): Promise<{ name: string; type: string }[]>
+```
+
+```typescript
+import { getColumns } from "@beekeeperstudio/plugin";
+const columns = await getColumns("users", "public");
+// [{ name: "id", type: "integer" }, { name: "email", type: "varchar" }]
+```
+
+### getTableKeys
+
+Returns foreign key relationships for a specific table. The result includes both incoming and outgoing references. Use `getIncomingKeys` and `getOutgoingKeys` for directional queries.
+
+```typescript
+async function getTableKeys(table: string, schema?: string): Promise<TableKey[]>
+```
+
+```typescript
+import { getTableKeys } from "@beekeeperstudio/plugin";
+const keys = await getTableKeys("orders", "public");
+// [{
+//   isComposite: false,
+//   toTable: "users", toSchema: "public", toColumn: "id",
+//   fromTable: "orders", fromSchema: "public", fromColumn: "user_id",
+//   constraintName: "fk_orders_user_id",
+//   onUpdate: "CASCADE", onDelete: "SET NULL"
+// }]
+```
+
+### getPrimaryKeys
+
+Returns primary key information for a specific table.
+
+```typescript
+async function getPrimaryKeys(table: string, schema?: string): Promise<PrimaryKey[]>
+```
+
+```typescript
+import { getPrimaryKeys } from "@beekeeperstudio/plugin";
+const primaryKeys = await getPrimaryKeys("users", "public");
+// [{ columnName: "id", position: 1 }]
+```
+
+### getTableIndexes
+
+Returns index information for a specific table.
+
+```typescript
+async function getTableIndexes(table: string, schema?: string): Promise<TableIndex[]>
+```
+
+```typescript
+import { getTableIndexes } from "@beekeeperstudio/plugin";
+const indexes = await getTableIndexes("users", "public");
+// [{
+//   id: "idx_users_email",
+//   table: "users", schema: "public", name: "idx_users_email",
+//   columns: [{ name: "email", order: "ASC" }],
+//   unique: true, primary: false
+// }]
+```
+
+### getIncomingKeys
+
+Returns foreign key relationships where other tables reference this table (references pointing *into* this table).
+
+```typescript
+async function getIncomingKeys(table: string, schema?: string): Promise<TableKey[]>
+```
+
+```typescript
+import { getIncomingKeys } from "@beekeeperstudio/plugin";
+const incomingKeys = await getIncomingKeys("users", "public");
+```
+
+### getOutgoingKeys
+
+Returns foreign key relationships where this table references other tables (references pointing *out of* this table).
+
+```typescript
+async function getOutgoingKeys(table: string, schema?: string): Promise<TableKey[]>
+```
+
+```typescript
+import { getOutgoingKeys } from "@beekeeperstudio/plugin";
+const outgoingKeys = await getOutgoingKeys("orders", "public");
+```
+
+---
+
+## Querying
+
+### runQuery
+
+Executes a SQL query against the current database and returns the results.
+
+<Warning>
+  The query is executed exactly as provided with no modification or sanitization. Always validate and sanitize user input before including it in a query to prevent unintended or destructive operations.
+</Warning>
+
+```typescript
+async function runQuery(query: string): Promise<{
+  results: QueryResult[];
+  error?: unknown;
+}>
+```
+
+```typescript
+import { runQuery } from "@beekeeperstudio/plugin";
+
+const result = await runQuery("SELECT * FROM users WHERE active = true LIMIT 10");
+// {
+//   results: [{
+//     fields: [
+//       { id: "1", name: "id", dataType: "integer" },
+//       { id: "2", name: "email", dataType: "varchar" }
+//     ],
+//     rows: [
+//       { id: 1, email: "user1@example.com" },
+//       { id: 2, email: "user2@example.com" }
+//     ]
+//   }]
+// }
+```
+
+### getConnectionInfo
+
+Returns metadata about the current database connection.
+
+```typescript
+async function getConnectionInfo(): Promise<{
+  connectionType: string;
+  id: number;
+  workspaceId: number;
+  connectionName: string;
+  databaseType: DatabaseType;
+  databaseName: string;
+  defaultSchema?: string;
+  readOnlyMode: boolean;
+}>
+```
+
+```typescript
+import { getConnectionInfo } from "@beekeeperstudio/plugin";
+const info = await getConnectionInfo();
+// {
+//   connectionType: "postgresql",
+//   id: 1,
+//   workspaceId: 123,
+//   connectionName: "Production DB",
+//   databaseType: "postgresql",
+//   databaseName: "myapp_production",
+//   defaultSchema: "public",
+//   readOnlyMode: false
+// }
+```
+
+Supported `databaseType` values: `postgresql`, `mysql`, `mariadb`, `sqlite`, `sqlserver`, `oracle`, `mongodb`, `cassandra`, `clickhouse`, `firebird`, `bigquery`, `redshift`, `duckdb`, `libsql`, `redis`, `surrealdb`, `trino`.
+
+---
+
+## Tab and view control
+
+### setTabTitle
+
+Sets the title displayed on the current plugin tab.
+
+```typescript
+async function setTabTitle(title: string): Promise<void>
+```
+
+```typescript
+import { setTabTitle } from "@beekeeperstudio/plugin";
+await setTabTitle("Data Analysis Tool");
+```
+
+### expandTableResult
+
+Populates the bottom result table panel in a `shell-tab` view with the provided query results. This is how your plugin renders tabular data in the familiar Beekeeper Studio result grid.
+
+```typescript
+async function expandTableResult(
+  results: {
+    fields: { id: string; name: string; dataType?: string }[];
+    rows: Record<string, JsonValue>[];
+  }[]
+): Promise<void>
+```
+
+```typescript
+import { expandTableResult } from "@beekeeperstudio/plugin";
+
+await expandTableResult([{
+  fields: [
+    { id: "1", name: "id", dataType: "integer" },
+    { id: "2", name: "name", dataType: "varchar" },
+  ],
+  rows: [
+    { id: 1, name: "Alice" },
+    { id: 2, name: "Bob" },
+  ],
+}]);
+```
+
+<Note>
+  Results replace any existing table data. Datasets are not paginated — be mindful of large result sets.
+</Note>
+
+### getViewContext
+
+Returns the context for the current view instance, describing how it was opened and what parameters were passed from the invocation point (e.g., which cell was right-clicked).
+
+```typescript
+async function getViewContext(): Promise<PluginViewContext>
+```
+
+```typescript
+import { getViewContext } from "@beekeeperstudio/plugin";
+
+const context = await getViewContext();
+// {
+//   command: "analyze-data",
+//   params: {
+//     target: { type: "cell", row: 0, column: "email", value: "user@example.com" },
+//     activeRange: {
+//       rows: [0, 1, 2],
+//       columns: ["id", "email"],
+//       value: [[1, "user1@example.com"], [2, "user2@example.com"], [3, "user3@example.com"]]
+//     }
+//   }
+// }
+```
+
+### getViewState
+
+Returns the persisted state for the current view instance. State survives application restarts.
+
+```typescript
+async function getViewState<T>(): Promise<T>
+```
+
+```typescript
+import { getViewState } from "@beekeeperstudio/plugin";
+
+const state = await getViewState<{ selectedTable: string; filters: string[] }>();
+if (state) {
+  applyFilters(state.filters);
+}
+```
+
+### setViewState
+
+Stores state for the current view instance. Each view tab maintains its own independent state.
+
+```typescript
+async function setViewState<T>(state: T): Promise<void>
+```
+
+```typescript
+import { setViewState } from "@beekeeperstudio/plugin";
+
+await setViewState({
+  selectedTable: "users",
+  filters: ["active = true"]
+});
+```
+
+### getAppInfo
+
+Returns information about the running application, including the current theme.
+
+```typescript
+async function getAppInfo(): Promise<{
+  version: string;
+  theme: {
+    palette: Record<string, string>;
+    cssString: string;
+    type: "dark" | "light";
+  };
+}>
+```
+
+```typescript
+import { getAppInfo } from "@beekeeperstudio/plugin";
+
+const app = await getAppInfo();
+document.querySelector("#app-theme").textContent =
+  `:root { ${app.theme.cssString} }`;
+```
+
+### getAppVersion
+
+Returns the version string of Beekeeper Studio.
+
+```typescript
+async function getAppVersion(): Promise<string>
+```
+
+```typescript
+import { getAppVersion } from "@beekeeperstudio/plugin";
+const version = await getAppVersion();
+// "5.4.0"
+```
+
+### openTab
+
+Opens a new tab in Beekeeper Studio. Supports query tabs, table data tabs, and table structure tabs.
+
+```typescript
+async function openTab(type: "query", options?: OpenQueryTabOptions): Promise<void>
+async function openTab(type: "tableTable", options: OpenTableTableTabOptions): Promise<void>
+async function openTab(type: "tableStructure", options: OpenTableStructureTabOptions): Promise<void>
+```
+
+```typescript
+import { openTab } from "@beekeeperstudio/plugin";
+
+// Open a new query tab with a pre-filled query
+await openTab("query", { query: "SELECT * FROM users" });
+
+// Open a table data tab with a filter applied
+await openTab("tableTable", {
+  table: "users",
+  schema: "public",
+  filters: [
+    { field: "active", type: "=", value: "true" }
+  ]
+});
+
+// Open the structure view for a table
+await openTab("tableStructure", {
+  table: "users",
+  schema: "public"
+});
+```
+
+### openExternal
+
+Opens a URL in the user's default external browser.
+
+```typescript
+async function openExternal(link: string): Promise<void>
+```
+
+```typescript
+import { openExternal } from "@beekeeperstudio/plugin";
+await openExternal("https://example.com");
+```
+
+---
+
+## Storage
+
+### getData
+
+Retrieves previously stored data by key. Omit the key to use the default key.
+
+```typescript
+async function getData<T = unknown>(key?: string): Promise<T>
+```
+
+```typescript
+import { getData } from "@beekeeperstudio/plugin";
+
+const data = await getData<{ name: string }>("myKey");
+const defaultData = await getData();
+```
+
+### setData
+
+Stores data that can be retrieved later with `getData`. Omit the key to use the default key.
+
+```typescript
+async function setData<T = unknown>(key: string, value: T): Promise<void>
+async function setData<T = unknown>(value: T): Promise<void>
+```
+
+```typescript
+import { setData } from "@beekeeperstudio/plugin";
+
+await setData("myKey", { name: "Alice" });
+await setData({ name: "Alice" }); // uses default key
+```
+
+### getEncryptedData
+
+Retrieves previously stored encrypted data by key. Use this for sensitive values like API tokens.
+
+```typescript
+async function getEncryptedData<T>(key: string): Promise<T>
+```
+
+```typescript
+import { getEncryptedData } from "@beekeeperstudio/plugin";
+const secret = await getEncryptedData<{ token: string }>("secretKey");
+```
+
+### setEncryptedData
+
+Stores data in encrypted form. Omit the key to use the default key.
+
+```typescript
+async function setEncryptedData<T = unknown>(key: string, value: T): Promise<void>
+async function setEncryptedData<T = unknown>(value: T): Promise<void>
+```
+
+```typescript
+import { setEncryptedData } from "@beekeeperstudio/plugin";
+
+await setEncryptedData("secretKey", { token: "abc123" });
+await setEncryptedData({ token: "abc123" }); // uses default key
+```
+
+---
+
+## File system
+
+### requestFileSave
+
+Opens a native file save dialog and writes the provided data to the user's filesystem.
+
+```typescript
+async function requestFileSave(options: RequestFileSaveOptions): Promise<void>
+```
+
+```typescript
+import { requestFileSave } from "@beekeeperstudio/plugin";
+
+// Save a text file
+await requestFileSave({
+  data: "SELECT * FROM users",
+  fileName: "query.sql",
+  filters: [
+    { name: "SQL Files", extensions: ["sql"] },
+    { name: "All Files", extensions: ["*"] }
+  ]
+});
+
+// Save a binary file from base64
+await requestFileSave({
+  data: base64ImageData,
+  fileName: "chart.png",
+  encoding: "base64",
+  filters: [
+    { name: "PNG Images", extensions: ["png"] }
+  ]
+});
+```
+
+---
+
+## Status bar
+
+### showStatusBarUI
+
+Shows your plugin's status bar UI element.
+
+```typescript
+async function showStatusBarUI(): Promise<void>
+```
+
+### hideStatusBarUI
+
+Hides your plugin's status bar UI element.
+
+```typescript
+async function hideStatusBarUI(): Promise<void>
+```
+
+### toggleStatusBarUI
+
+Toggles the visibility of your plugin's status bar UI element.
+
+```typescript
+async function toggleStatusBarUI(): Promise<void>
+```
+
+---
+
+## Clipboard
+
+### clipboard.writeText
+
+Writes a text string to the system clipboard.
+
+```typescript
+async function writeText(text: string): Promise<void>
+```
+
+```typescript
+import { clipboard } from "@beekeeperstudio/plugin";
+await clipboard.writeText("Hello world!");
+```
+
+### clipboard.readText
+
+Reads the current text content of the system clipboard.
+
+```typescript
+async function readText(): Promise<string>
+```
+
+```typescript
+import { clipboard } from "@beekeeperstudio/plugin";
+const text = await clipboard.readText();
+```
+
+### clipboard.writeImage
+
+Writes a base64-encoded image to the system clipboard.
+
+```typescript
+async function writeImage(data: string): Promise<void>
+```
+
+```typescript
+import { clipboard } from "@beekeeperstudio/plugin";
+await clipboard.writeImage(base64ImageData);
+```
+
+---
+
+## Inter-view broadcast
+
+### broadcast.post
+
+Broadcasts a message to all other active view instances of your plugin.
+
+```typescript
+function post(message: JsonValue): Promise<void>
+```
+
+```typescript
+import { broadcast } from "@beekeeperstudio/plugin";
+broadcast.post({ type: "refresh", table: "users" });
+```
+
+### broadcast.on
+
+Registers a listener for broadcast messages from other view instances of your plugin.
+
+```typescript
+function on(callback: (message: JsonValue) => void): void
+```
+
+```typescript
+import { broadcast } from "@beekeeperstudio/plugin";
+broadcast.on((message) => {
+  console.log("Received:", message);
+});
+```
+
+---
+
+## Plugin updates
+
+### checkForUpdate
+
+Checks the plugin registry for a newer version of your plugin. Returns `true` if an update is available.
+
+```typescript
+async function checkForUpdate(): Promise<boolean>
+```
+
+```typescript
+import { checkForUpdate } from "@beekeeperstudio/plugin";
+const updateAvailable = await checkForUpdate();
+if (updateAvailable) {
+  await noty.info("A new version of this plugin is available.");
+}
+```
+
+---
+
+## Notifications (toast messages)
+
+### noty.info
+
+Displays an informational toast notification.
+
+```typescript
+await noty.info(message: string): Promise<void>
+```
+
+```typescript
+import { noty } from "@beekeeperstudio/plugin";
+await noty.info("Query executed in 2.3 seconds");
+```
+
+### noty.success
+
+Displays a success toast notification.
+
+```typescript
+await noty.success(message: string): Promise<void>
+```
+
+```typescript
+import { noty } from "@beekeeperstudio/plugin";
+await noty.success("Data imported successfully!");
+```
+
+### noty.error
+
+Displays an error toast notification.
+
+```typescript
+await noty.error(message: string): Promise<void>
+```
+
+```typescript
+import { noty } from "@beekeeperstudio/plugin";
+await noty.error("Failed to connect to the database");
+```
+
+### noty.warning
+
+Displays a warning toast notification.
+
+```typescript
+await noty.warning(message: string): Promise<void>
+```
+
+```typescript
+import { noty } from "@beekeeperstudio/plugin";
+await noty.warning("This operation may take a while");
+```
+
+---
+
+## Dialogs
+
+### confirm
+
+Displays a modal confirmation dialog and returns `true` if the user confirms, `false` if they cancel.
+
+```typescript
+async function confirm(
+  title?: string,
+  message?: string,
+  options?: { confirmLabel?: string; cancelLabel?: string }
+): Promise<boolean>
+```
+
+```typescript
+import { confirm } from "@beekeeperstudio/plugin";
+
+// Basic confirmation
+const ok = await confirm();
+
+// With title and message
+const ok = await confirm("Delete Table", "Are you sure you want to delete this table?");
+
+// With custom button labels
+const ok = await confirm(
+  "Export Data",
+  "This will export all data to a CSV file. Continue?",
+  { confirmLabel: "Export", cancelLabel: "Cancel" }
+);
+
+if (ok) {
+  // proceed
+}
+```
+
+---
+
+## Application notifications
+
+Application notifications are events emitted by Beekeeper Studio to inform your plugin about changes in the application state. Subscribe using `addNotificationListener` and unsubscribe with `removeNotificationListener`.
+
+### addNotificationListener
+
+Registers a handler for a named notification event.
+
+```typescript
+function addNotificationListener(name: "tablesChanged", handler: () => void): void
+function addNotificationListener<Message extends JsonValue = JsonValue>(
+  name: "broadcast",
+  handler: (args: { message: Message }) => void
+): void
+function addNotificationListener(name: "themeChanged", handler: (appTheme: AppTheme) => void): void
+function addNotificationListener(name: "windowEvent", handler: (params: WindowEventParams) => void): void
+```
+
+### removeNotificationListener
+
+Unregisters a previously registered notification handler.
+
+```typescript
+function removeNotificationListener(name: "tablesChanged", handler: (args: any) => void): void
+function removeNotificationListener<Message extends JsonValue = JsonValue>(
+  name: "broadcast",
+  handler: (args: any) => void
+): void
+function removeNotificationListener(name: "themeChanged", handler: (args: any) => void): void
+```
+
+### tablesChanged
+
+Fired when tables in the connected database change — for example, after a `CREATE TABLE`, `DROP TABLE`, or `ALTER TABLE` operation.
+
+```typescript
+import { addNotificationListener } from "@beekeeperstudio/plugin";
+
+addNotificationListener("tablesChanged", () => {
+  console.log("Tables have changed — refreshing list...");
+  refreshTableList();
+});
+```
+
+### broadcast
+
+Fired when another view of your plugin calls `broadcast.post()`.
+
+<Note>
+  This is handled automatically when you use `broadcast.on()`. You typically do not need to subscribe to this notification directly.
+</Note>
+
+```typescript
+import { addNotificationListener } from "@beekeeperstudio/plugin";
+
+addNotificationListener("broadcast", ({ message }) => {
+  console.log("Received broadcast:", message);
+});
+```
+
+### themeChanged
+
+Fired when the user switches the application theme (e.g., light to dark). The handler receives an `AppTheme` object.
+
+```typescript
+import { addNotificationListener } from "@beekeeperstudio/plugin";
+
+addNotificationListener("themeChanged", (appTheme) => {
+  document.querySelector("#app-theme").textContent =
+    `:root { ${appTheme.cssString} }`;
+});
+```
+
+### windowEvent
+
+Fired for various window-level events forwarded from the host application.
+
+<Info>
+  This notification is primarily for internal use by the `eventForwarder.js` module.
+</Info>
+
+```typescript
+import { addNotificationListener } from "@beekeeperstudio/plugin";
+
+addNotificationListener("windowEvent", (params) => {
+  if (params.eventType === "resize") {
+    // handle resize
+  }
+});
+```
+
+The `params` object has this shape:
+
+```typescript
+{
+  eventType: string;
+  eventClass: "MouseEvent" | "KeyboardEvent" | "PointerEvent" | "Event";
+  eventInitOptions: MouseEventInit | KeyboardEventInit | PointerEventInit;
+}
+```
+
+### Unsubscribing
+
+Always remove listeners you no longer need to avoid memory leaks and stale handlers:
+
+```typescript
+import { addNotificationListener, removeNotificationListener } from "@beekeeperstudio/plugin";
+
+const handler = () => refreshTableList();
+
+addNotificationListener("tablesChanged", handler);
+
+// Later, when the view is torn down:
+removeNotificationListener("tablesChanged", handler);
+```
+
+---
+
+## Type definitions
+
+### Result
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `rows` | `object[]` | Array of result rows |
+| `fields` | `Field[]` | Array of field definitions |
+| `rowCount` | `number` | Number of rows returned |
+| `affectedRows` | `number` | Rows affected by INSERT / UPDATE / DELETE |
+
+### Field
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `name` | `string` | Column name |
+| `dataType` | `string` | Column data type |
+
+### Column
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `name` | `string` | Column name |
+| `dataType` | `string` | Column data type |
+| `nullable` | `boolean` | Whether the column accepts NULL |
+| `primaryKey` | `boolean` | Whether the column is part of the primary key |
+| `defaultValue` | `any` | Default value for the column |
+
+### Table
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `name` | `string` | Table name |
+| `schema` | `string` | Schema name (optional) |
+
+### TableKey
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `isComposite` | `boolean` | Whether the key spans multiple columns |
+| `toTable` | `string` | Target table name |
+| `toSchema` | `string` | Target schema name |
+| `toColumn` | `string \| string[]` | Target column(s) |
+| `fromTable` | `string` | Source table name |
+| `fromSchema` | `string` | Source schema name |
+| `fromColumn` | `string \| string[]` | Source column(s) |
+| `constraintName` | `string` | Constraint name (optional) |
+| `onUpdate` | `string` | ON UPDATE action (optional) |
+| `onDelete` | `string` | ON DELETE action (optional) |
+
+### PrimaryKey
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `columnName` | `string` | Column name |
+| `position` | `number` | Position in composite primary key (1-indexed) |
+
+### TableIndex
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `id` | `string` | Index identifier |
+| `table` | `string` | Table name |
+| `schema` | `string` | Schema name |
+| `name` | `string` | Index name |
+| `columns` | `IndexColumn[]` | Columns included in the index |
+| `unique` | `boolean` | Whether the index enforces uniqueness |
+| `primary` | `boolean` | Whether this is the primary key index |
+| `nullsNotDistinct` | `boolean` | PostgreSQL 15+: whether NULLs count as distinct (optional) |
+
+### IndexColumn
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `name` | `string` | Column name |
+| `order` | `'ASC' \| 'DESC' \| '2d' \| '2dsphere' \| 'text' \| 'geoHaystack' \| 'hashed' \| number` | Sort order (optional) |
+| `prefix` | `number \| null` | MySQL index prefix length (optional) |
+
+### QueryResult
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `fields` | `{ id: string; name: string; dataType?: string }[]` | Field definitions |
+| `rows` | `object[]` | Result rows |
+
+### ConnectionInfo
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `connectionType` | `string` | Alias for `databaseType` |
+| `id` | `number` | Connection ID |
+| `workspaceId` | `number` | Workspace ID |
+| `connectionName` | `string` | Human-readable name set in the connection form |
+| `databaseType` | `DatabaseType` | Type of database |
+| `databaseName` | `string` | Name of the connected database |
+| `defaultSchema` | `string` | Default schema (optional) |
+| `readOnlyMode` | `boolean` | Whether the connection is read-only |
+
+### AppTheme
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `palette` | `Record<string, string>` | Key-value map of color names to hex codes |
+| `cssString` | `string` | Generated CSS custom property declarations |
+| `type` | `ThemeType` | `"dark"` or `"light"` |
+
+### PluginViewContext
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `command` | `string` | The `command` field from the triggering menu item in `manifest.json` |
+| `params` | `LoadViewParams` | Context-specific parameters, present when opened from a context menu (optional) |
+
+### OpenQueryTabOptions
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `query` | `string` | SQL query to pre-fill in the new tab (optional) |
+
+### OpenTableTableTabOptions
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `table` | `string` | Table name |
+| `schema` | `string` | Schema name (optional) |
+| `filters` | `TableFilter[]` | Filters to pre-apply (optional) |
+| `database` | `string` | Database name (optional) |
+
+### OpenTableStructureTabOptions
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `table` | `string` | Table name |
+| `schema` | `string` | Schema name (optional) |
+| `database` | `string` | Database name (optional) |
+
+### TableFilter
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `field` | `string` | Column name to filter on |
+| `type` | `'=' \| '!=' \| 'like' \| 'not like' \| '<' \| '<=' \| '>' \| '>=' \| 'in' \| 'is' \| 'is not'` | Filter operator |
+| `value` | `string \| string[]` | Filter value(s) (optional) |
+| `op` | `'AND' \| 'OR'` | Logical operator combining this filter with the next (optional) |
+
+### RequestFileSaveOptions
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `data` | `string` | Data to write to the file |
+| `fileName` | `string` | Default filename shown in the save dialog |
+| `encoding` | `'utf8' \| 'base64'` | Encoding of `data` (default: `"utf8"`) |
+| `filters` | `{ name: string; extensions: string[] }[]` | File type filters shown in the dialog (optional) |
+
+### DatabaseType
+
+Union of all supported database identifiers:
+
+```typescript
+type DatabaseType =
+  | 'postgresql' | 'mysql' | 'mariadb' | 'sqlite' | 'sqlserver'
+  | 'oracle' | 'mongodb' | 'cassandra' | 'clickhouse' | 'firebird'
+  | 'bigquery' | 'redshift' | 'duckdb' | 'libsql' | 'redis'
+  | 'surrealdb' | 'trino'
+```
+
+### ThemeType
+
+```typescript
+type ThemeType = "dark" | "light"
+```
+
+### JsonValue
+
+```typescript
+type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | Record<string, JsonValue>
+  | JsonValue[]
+```
